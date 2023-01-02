@@ -8,6 +8,7 @@ public record Rover
     public string Id { get; }
     public Coordinate CurrentPosition { get; private set; }
     public int Sight { get; }
+    public Dictionary<string, int> Resources { get; set; }
     public Dictionary<string, HashSet<Coordinate>> ExploredObjects { get; set; }
     public List<Coordinate> PositionHistory { get; }
     private readonly IMovementRoutine _exploringRoutine;
@@ -19,6 +20,7 @@ public record Rover
         Sight = sight;
         _exploringRoutine = exploringRoutine;
         _returningRoutine = returningRoutine;
+        Resources = new();
         ExploredObjects = new Dictionary<string, HashSet<Coordinate>>();
         PositionHistory = new List<Coordinate>();
 
