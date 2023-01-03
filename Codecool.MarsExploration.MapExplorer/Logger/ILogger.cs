@@ -6,9 +6,10 @@ namespace Codecool.MarsExploration.MapExplorer.Logger;
 public interface ILogger
 {
     void Log(string message);
-    void ActionLog(string actionType, string name, int stepNumber);
-    void PositionLog(Coordinate coordinate, string name, int stepNumber);
-    void OutcomeLog(ExplorationOutcome outcome, string name, int stepNumber);
+    void Log(string message, int stepNumber);
+    void ActionLog(int stepNumber, string actionType, string name, string? target, string? currentProgress, string? maxProgress);
+    void PositionLog(int stepNumber, Coordinate coordinate, string name);
+    void OutcomeLog(int stepNumber, ExplorationOutcome outcome);
 
 
 }
