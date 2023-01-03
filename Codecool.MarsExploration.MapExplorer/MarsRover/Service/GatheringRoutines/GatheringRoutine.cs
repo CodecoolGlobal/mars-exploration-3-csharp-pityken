@@ -21,17 +21,19 @@ public class GatheringRoutine : IGatheringRoutine
     {
 
         bool hasCollectedResource = rover.Inventory.Any();
+        IEnumerable<Coordinate> adjacentCoordinatesOfResource = resourceNode.Coordinate.GetAdjacentCoordinates(mapDimension);
+        IEnumerable<Coordinate> adjacentCoordinatesOfCommandCenter = commandCenter.Position.GetAdjacentCoordinates(mapDimension);
 
-        if (rover.CurrentPosition.GetAdjacentCoordinates(mapDimension).Contains(resourceNode.Coordinate) && !hasCollectedResource)
+        if (adjacentCoordinatesOfResource.Contains(rover.CurrentPosition) && !hasCollectedResource)
         {
             while (rover.Inventory.Count < rover.InventorySize)
             {
                 rover.Inventory.Add(resourceNode.Type, 1);
             }
-            return resourceNode.Coordinate;
+            return rover.CurrentPosition;
         }
 
-        if (commandCenter.Position.GetAdjacentCoordinates(mapDimension).Contains(rover.CurrentPosition) && hasCollectedResource)
+        if (adjacentCoordinatesOfCommandCenter.Contains(rover.CurrentPosition) && hasCollectedResource)
         {
             commandCenter.AddToResources(rover.Inventory);
             return rover.CurrentPosition;
