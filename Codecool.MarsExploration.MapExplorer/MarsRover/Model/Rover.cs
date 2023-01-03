@@ -11,7 +11,7 @@ public record Rover
 
     public int Sight { get; }
     public int InventorySize { get; }
-
+    public int MaxExplorationStepCount { get; }
     public Coordinate CurrentPosition { get; private set; }
     public Coordinate? CommandCenterCoordinate { get; }
 
@@ -24,8 +24,15 @@ public record Rover
     private readonly IMovementRoutine _exploringRoutine;
     private readonly IMovementRoutine _returningRoutine;
     private readonly IGatheringRoutine _gatheringRoutine;
+    private int currentExplorationStepNumber = 0;
 
-    public Rover(IMovementRoutine exploringRoutine, IMovementRoutine returningRoutine, IGatheringRoutine gatheringRoutine, int id, Coordinate deployPosition, int sight)
+    public Rover(IMovementRoutine exploringRoutine, 
+        IMovementRoutine returningRoutine, 
+        IGatheringRoutine gatheringRoutine, 
+        int id, 
+        Coordinate deployPosition, 
+        int sight, 
+        int maxExplorationStepCount)
     {
         Id = $"rover-{id}";
         Sight = sight;
@@ -35,6 +42,7 @@ public record Rover
         Inventory = new();
         ExploredObjects = new Dictionary<string, HashSet<Coordinate>>();
         PositionHistory = new List<Coordinate>();
+        MaxExplorationStepCount = maxExplorationStepCount;
 
         SetPosition(deployPosition);
     }
