@@ -5,5 +5,10 @@ namespace Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutin
 
 public interface IGatheringRoutine
 {
-    bool GatherResource(ResourceNode resourceNode, Coordinate commandCenterCoordinate, Dictionary<string, int> Inventory, int inventorySize);
+    Coordinate GatherResource(
+        ResourceNode resourceNode, 
+        Coordinate commandCenterCoordinate, 
+        Coordinate RoverPsition, 
+        Dictionary<string, int> Inventory, 
+        int inventorySize);
 }
