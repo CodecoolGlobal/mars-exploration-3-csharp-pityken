@@ -1,4 +1,6 @@
-﻿using Codecool.MarsExploration.MapExplorer.MarsRover.Service.MovementRoutines;
+﻿using Codecool.MarsExploration.MapExplorer.CommandCenter.Model;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutines;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Service.MovementRoutines;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 
 namespace Codecool.MarsExploration.MapExplorer.MarsRover.Model;
@@ -6,21 +8,31 @@ namespace Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 public record Rover
 {
     public string Id { get; }
-    public Coordinate CurrentPosition { get; private set; }
+
     public int Sight { get; }
-    public Dictionary<string, int> Resources { get; set; }
+    public int InventorySize { get; }
+
+    public Coordinate CurrentPosition { get; private set; }
+    public Coordinate? CommandCenterCoordinate { get; }
+
+    public Dictionary<string, int> Inventory { get; set; }
     public Dictionary<string, HashSet<Coordinate>> ExploredObjects { get; set; }
     public List<Coordinate> PositionHistory { get; }
+
+    public ResourceNode? ResourceNode { get; }
+
     private readonly IMovementRoutine _exploringRoutine;
     private readonly IMovementRoutine _returningRoutine;
+    private readonly IGatheringRoutine _gatheringRoutine;
 
-    public Rover(IMovementRoutine exploringRoutine, IMovementRoutine returningRoutine, int id, Coordinate deployPosition, int sight)
+    public Rover(IMovementRoutine exploringRoutine, IMovementRoutine returningRoutine, IGatheringRoutine gatheringRoutine, int id, Coordinate deployPosition, int sight)
     {
         Id = $"rover-{id}";
         Sight = sight;
         _exploringRoutine = exploringRoutine;
         _returningRoutine = returningRoutine;
-        Resources = new();
+        _gatheringRoutine = gatheringRoutine;
+        Inventory = new();
         ExploredObjects = new Dictionary<string, HashSet<Coordinate>>();
         PositionHistory = new List<Coordinate>();
 
@@ -43,5 +55,10 @@ public record Rover
             return true;
         }
         return false;
+    }
+
+    public bool GatherResource()
+    {
+        throw new NotImplementedException();
     }
 }
