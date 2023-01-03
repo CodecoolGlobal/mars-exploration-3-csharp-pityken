@@ -10,13 +10,9 @@ public class CommandCenterBuildableDeterminer : IBuildableDeterminer
     public bool Determine(SimulationContext simulationContext, string roverId)
     {
         Rover selectedRover = FindRover(simulationContext, roverId);
-        List<Coordinate> roverVisibleCoordinates = selectedRover.CurrentPosition.GetAdjacentCoordinates(simulationContext.Map.Dimension, selectedRover.Sight).ToList();
+        List<Coordinate> selectedRoverVisibleCoordinates = selectedRover.CurrentPosition.GetAdjacentCoordinates(simulationContext.Map.Dimension, selectedRover.Sight).ToList();
 
-        if (EnoughResourcesInSight(simulationContext, roverVisibleCoordinates) && !CommandCenterRadiusOverlap(simulationContext, roverVisibleCoordinates))
-        {
-            return true;
-        }
-        return false;
+        return EnoughResourcesInSight(simulationContext, selectedRoverVisibleCoordinates) && !CommandCentersRadiusOverlapWithSight(simulationContext, selectedRoverVisibleCoordinates);
     }
 
     private bool EnoughResourcesInSight(SimulationContext simulationContext, List<Coordinate> visibleCoordinates)
@@ -24,7 +20,7 @@ public class CommandCenterBuildableDeterminer : IBuildableDeterminer
         int colonizableAmountOfMineral = 4;
         int colonizableAmountOfWater = 3;
 
-        int amountOfMineralFound = 0; 
+        int amountOfMineralFound = 0;
         int amountOfWaterFound = 0;
         foreach (var coordinate in visibleCoordinates)
         {
@@ -37,7 +33,7 @@ public class CommandCenterBuildableDeterminer : IBuildableDeterminer
         return amountOfMineralFound >= colonizableAmountOfMineral && amountOfWaterFound >= colonizableAmountOfWater;
     }
 
-    private bool CommandCenterRadiusOverlap(SimulationContext simulationContext, List<Coordinate> visibleCoordinates)
+    private bool CommandCentersRadiusOverlapWithSight(SimulationContext simulationContext, List<Coordinate> visibleCoordinates)
     {
         bool overlap = false;
         foreach (var commandCenter in simulationContext.CommandCenters)
