@@ -12,6 +12,7 @@ using Codecool.MarsExploration.MapExplorer.MarsRover.Service.MovementRoutines;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 using Codecool.MarsExploration.MapGenerator.MapElements.Model;
 using Codecool.MarsExploration.MapExplorer.Configuration.Service;
+using Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSteps;
 
 namespace Codecool.MarsExploration.MapExplorer;
 

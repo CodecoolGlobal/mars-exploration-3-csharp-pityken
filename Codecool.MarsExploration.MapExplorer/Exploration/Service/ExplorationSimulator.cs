@@ -1,4 +1,5 @@
 ﻿using Codecool.MarsExploration.MapExplorer.Exploration.Model;
+using Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSteps;
 using Codecool.MarsExploration.MapExplorer.ExplorationSummary.Exporter;
 
 namespace Codecool.MarsExploration.MapExplorer.Exploration.Service

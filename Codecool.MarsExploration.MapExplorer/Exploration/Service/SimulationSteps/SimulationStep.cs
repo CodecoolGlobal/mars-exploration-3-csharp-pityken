@@ -2,7 +2,7 @@
 using Codecool.MarsExploration.MapExplorer.Logger;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 
-namespace Codecool.MarsExploration.MapExplorer.Exploration.Service;
+namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSteps;
 
 public class SimulationStep : ISimulationStep
 {

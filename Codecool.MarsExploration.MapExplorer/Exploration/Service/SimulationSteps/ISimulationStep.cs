@@ -1,6 +1,6 @@
 ﻿using Codecool.MarsExploration.MapExplorer.Exploration.Model;
 
-namespace Codecool.MarsExploration.MapExplorer.Exploration.Service;
+namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSteps;
 
 public interface ISimulationStep
 {
