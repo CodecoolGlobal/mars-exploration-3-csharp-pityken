@@ -15,14 +15,12 @@ public class ColonizationSuccessAnalyzer : IAnalyzer
 
     private static bool CheckColonizableAmountsOfCommandCenters(SimulationContext simulationContext)
     {
-        int colonizableAmountOfCommandCenters = 3;
-
         int amountOfWorkingCommandCenters = 0;
         foreach (var commandCenter in simulationContext.CommandCenters)
         {
             if (commandCenter.CommandCenterStatus != CommandCenter.Model.CommandCenterStatus.UnderConstruction)
                 amountOfWorkingCommandCenters++;
         }
-        return amountOfWorkingCommandCenters >= colonizableAmountOfCommandCenters;
+        return amountOfWorkingCommandCenters >= simulationContext.CommandCentersNeeded;
     }
 }
