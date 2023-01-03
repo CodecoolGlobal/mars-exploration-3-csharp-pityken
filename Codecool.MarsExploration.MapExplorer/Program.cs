@@ -55,7 +55,7 @@ class Program
                 new FileLogger(logFilePath),
             };
 
-            IOutcomeDeterminer outcomeDeterminer = new OutcomeDeterminer();
+            IOutcomeDeterminer outcomeDeterminer = new ColonizationOutcomeDeterminer();
             ISimulationStep simulationStep = new SimulationStep(simulationContext, outcomeDeterminer, loggers);
 
             IExplorationSummaryGenerator explorationSimulationGenerator = new ExplorationSummaryGenerator();
