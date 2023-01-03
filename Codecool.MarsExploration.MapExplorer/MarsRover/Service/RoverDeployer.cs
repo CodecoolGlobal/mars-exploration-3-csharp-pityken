@@ -1,4 +1,5 @@
-﻿using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
+﻿using Codecool.MarsExploration.MapExplorer.Extensions;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutines;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.MovementRoutines;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
@@ -14,14 +15,14 @@ public class RoverDeployer : IRoverDeployer
     private readonly IGatheringRoutine _gatheringRoutine;
     private readonly int _id;
     private readonly int _sight;
-    private readonly Coordinate _shipLocation;
+    private readonly Coordinate _deployPoint;
     private static readonly Random _random = new();
 
     public RoverDeployer(IMovementRoutine exploringRoutine, IMovementRoutine returningRoutine, int id, int sight, Coordinate shipLocation, Map map, IGatheringRoutine gatheringRoutine)
     {
         _exploringRoutine = exploringRoutine;
         _returningRoutine = returningRoutine;
-        _shipLocation = shipLocation;
+        _deployPoint = shipLocation;
         _id = id;
         _sight = sight;
         _map = map;
@@ -30,7 +31,7 @@ public class RoverDeployer : IRoverDeployer
 
     public Rover Deploy()
     {
-        Coordinate[] adjacentCoordinates = GetAdjacentCoordinates(_shipLocation, _map.Dimension).ToArray();
+        Coordinate[] adjacentCoordinates = _deployPoint.GetAdjacentCoordinates(_map.Dimension).ToArray();
         Coordinate? deployPosition = GetRandomEmptyAdjacentCoordinate(adjacentCoordinates);
 
         //foreach (var item in adjacentCoordinates)
@@ -60,20 +61,4 @@ public class RoverDeployer : IRoverDeployer
         return randomEmptyCoordinate;
     }
 
-    private IEnumerable<Coordinate> GetAdjacentCoordinates(Coordinate coordinate, int mapDimension, int reach = 1)
-    {
-        Coordinate[] adjacent = new[]
-        {
-            coordinate with { Y = coordinate.Y + reach },
-            coordinate with { Y = coordinate.Y - reach },
-            coordinate with { X = coordinate.X + reach },
-            coordinate with { X = coordinate.X - reach },
-            coordinate with { X = coordinate.X + reach, Y = coordinate.Y + reach },
-            coordinate with { X = coordinate.X - reach, Y = coordinate.Y + reach },
-            coordinate with { X = coordinate.X + reach, Y = coordinate.Y - reach },
-            coordinate with { X = coordinate.X - reach, Y = coordinate.Y - reach },
-        };
-
-        return adjacent.Where(c => c.X >= 0 && c.Y >= 0 && c.X < mapDimension && c.Y < mapDimension);
-    }
 }
