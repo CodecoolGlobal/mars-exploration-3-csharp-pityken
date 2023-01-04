@@ -15,13 +15,13 @@ public record Rover
     public int InventorySize { get; }
     public int MaxExplorationStepCount { get; }
     public Coordinate CurrentPosition { get; private set; }
-    public CommandCenter.Model.CommandCenter? AssignedCommandCenter { get; }
+    public CommandCenter.Model.CommandCenter? AssignedCommandCenter { get; private set; }
 
     public Dictionary<string, int> Inventory { get; set; }
     public Dictionary<string, HashSet<Coordinate>> ExploredObjects { get; set; }
     public List<Coordinate> PositionHistory { get; }
 
-    public ResourceNode? ResourceNode { get; }
+    public ResourceNode? ResourceNode { get; private set; }
     //public int AssemblyStatus { get; private set;  }
 
     private readonly IMovementRoutine _exploringRoutine;
@@ -114,9 +114,20 @@ public record Rover
         Inventory.Remove(resource.Type, out int removedItem);
     }
 
+    public void AssignCommandCenter(CommandCenter.Model.CommandCenter commandCenter)
+    {
+        AssignedCommandCenter = commandCenter;
+    }
+
+    public void AssignResourceNode(ResourceNode resourceToAssign)
+    {
+        ResourceNode = resourceToAssign;
+    }
+
     private bool CheckCoordinateEquality(Coordinate coordinateOne, Coordinate coordinateTwo)
     {
         return coordinateOne.X == coordinateTwo.X && coordinateOne.Y == coordinateTwo.Y;
     }
+
 
 }
