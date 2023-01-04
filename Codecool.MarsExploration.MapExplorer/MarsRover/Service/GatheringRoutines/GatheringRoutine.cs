@@ -28,14 +28,21 @@ public class GatheringRoutine : IGatheringRoutine
         {
             while (rover.Inventory.Count < rover.InventorySize)
             {
-                rover.Inventory.Add(resourceNode.Type, 1);
+                rover.AddToInventory(resourceNode);
             }
+
             return rover.CurrentPosition;
         }
 
         if (adjacentCoordinatesOfCommandCenter.Contains(rover.CurrentPosition) && hasCollectedResource)
         {
             commandCenter.AddToResources(rover.Inventory);
+
+            while (rover.Inventory.Count > 0)
+            {
+                rover.RemoveFromInventory(resourceNode);
+            }
+           
             return rover.CurrentPosition;
         }
 
