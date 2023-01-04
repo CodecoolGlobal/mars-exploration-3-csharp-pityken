@@ -13,7 +13,7 @@ public record Rover
     public int InventorySize { get; }
     public int MaxExplorationStepCount { get; }
     public Coordinate CurrentPosition { get; private set; }
-    public Coordinate? CommandCenterCoordinate { get; }
+    public CommandCenter.Model.CommandCenter? CommandCenter { get; }
 
     public Dictionary<string, int> Inventory { get; set; }
     public Dictionary<string, HashSet<Coordinate>> ExploredObjects { get; set; }
@@ -65,7 +65,17 @@ public record Rover
         return false;
     }
 
-    public bool GatherResource()
+    public bool GatherResource(int mapDimension)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool CheckCommandCenterBuildibility(int ResourcesNeededForCommandCenter)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void BuildCommandCenter()
     {
         throw new NotImplementedException();
     }

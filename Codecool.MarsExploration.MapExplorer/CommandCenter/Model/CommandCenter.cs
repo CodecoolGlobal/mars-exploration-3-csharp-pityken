@@ -29,4 +29,9 @@ public class CommandCenter
         _roverBuilderAction = roverBuilderAction;
     }
 
+    public void UpdateStatus() 
+    {
+    
+    }
+
 }
