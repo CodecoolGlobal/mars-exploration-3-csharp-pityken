@@ -41,12 +41,12 @@ public class GatheringRoutine : IGatheringRoutine
 
         if (!hasCollectedResource)
         {
-            Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(resourceNode.Coordinate);
+            Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(resourceNode.Coordinate, rover.CurrentPosition);
             return newCoordinate;
         }
         else
         {
-            Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(commandCenter.Position);
+            Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(commandCenter.Position, rover.CurrentPosition);
             return newCoordinate;
         }
     }
