@@ -1,5 +1,5 @@
 ﻿using Codecool.MarsExploration.MapExplorer.CommandCenter.Model;
-using Codecool.MarsExploration.MapExplorer.MarsRover.BuildingRoutine;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Service.BuildingRoutine;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutines;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.MovementRoutines;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
@@ -10,25 +10,22 @@ namespace Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 public record Rover
 {
     public string Id { get; }
-
     public int Sight { get; }
     public int InventorySize { get; }
     public int MaxExplorationStepCount { get; }
     public Coordinate CurrentPosition { get; private set; }
     public CommandCenter.Model.CommandCenter? AssignedCommandCenter { get; private set; }
-
     public Dictionary<string, int> Inventory { get; set; }
     public Dictionary<string, HashSet<Coordinate>> ExploredObjects { get; set; }
     public List<Coordinate> PositionHistory { get; }
     public int CurrentExplorationStepNumber { get; private set; }
-
     public ResourceNode? ResourceNode { get; private set; }
     //public int AssemblyStatus { get; private set;  }
 
     private readonly IMovementRoutine _exploringRoutine;
     private readonly IMovementRoutine _returningRoutine;
     private readonly IGatheringRoutine _gatheringRoutine;
-    private readonly IBuidingRoutine _buildingRoutine;
+    private readonly IBuildingRoutine _buildingRoutine;
 
 
     public Rover(IMovementRoutine exploringRoutine,
@@ -38,7 +35,7 @@ public record Rover
         Coordinate deployPosition,
         int sight,
         int maxExplorationStepCount,
-        IBuidingRoutine buildingRoutine
+        IBuildingRoutine buildingRoutine
         )
     {
         Id = $"rover-{id}";
