@@ -104,6 +104,11 @@ public class CommandCenter
                     }
                     else
     {
-        
+                        resourcesInRadius.Add(res.Type, 1);
+                    }
+                }
+            }
+        }
+        return resourcesInRadius;
     }
 }
