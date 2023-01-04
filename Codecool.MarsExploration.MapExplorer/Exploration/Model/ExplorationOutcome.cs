@@ -5,5 +5,6 @@ public enum ExplorationOutcome
     Error,
     Timeout,
     Colonizable,
+    NotColonizable,
     None
 }
