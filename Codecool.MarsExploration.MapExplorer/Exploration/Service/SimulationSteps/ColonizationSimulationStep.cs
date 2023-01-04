@@ -14,12 +14,14 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
     {
         private readonly SimulationContext _simulationContext;
         private readonly IOutcomeDeterminer _outcomeDeterminer;
+        private readonly IBuildableDeterminer _commandCenterBuildableDeterminer;
         private readonly IEnumerable<ILogger> _loggers;
 
-        public ColonizationSimulationStep(SimulationContext simulationContext, IOutcomeDeterminer outcomeDeterminer, IEnumerable<ILogger> loggers)
+        public ColonizationSimulationStep(SimulationContext simulationContext, IOutcomeDeterminer outcomeDeterminer, IEnumerable<ILogger> loggers, IBuildableDeterminer commandCenterBuildableDeterminer)
         {
             _simulationContext = simulationContext;
             _outcomeDeterminer = outcomeDeterminer;
+            _commandCenterBuildableDeterminer = commandCenterBuildableDeterminer;
             _loggers = loggers;
         }
         public ExplorationOutcome Step()
@@ -37,19 +39,27 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             {
                 if (!CommandCenterAssignedToRover(r))
                 {
-                    r.Move(_simulationContext.Map.Dimension);
-                    
+                    if (_commandCenterBuildableDeterminer.Determine(_simulationContext, r.Id))
+                    {
+
+                        //log
+                    }
+                    else
+                    {
+                        r.Move(_simulationContext.Map.Dimension);
+                        //log
+                    }
                 }
                 else if (CommandCenterAssignedToRover(r) && ResourceNodeAssignedToRover(r))
                 {
                     r.GatherResource(_simulationContext.Map.Dimension);
-                    
+                    CheckCommandCenterBuildRequirements(r);
+                    //log
                 }
                 else
                 {
                     throw new Exception($"There is no ResourceNode assigned to the mining rover: {r.Id}");
                 }
-                //log
             });
         }
 
