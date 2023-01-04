@@ -88,7 +88,21 @@ public class CommandCenter
         return false;
     }
 
-    private void GetResourcesInRadius()
+    private Dictionary<string, int> GetResourcesInRadius(List<ResourceNode> ResourceNodes)
+    {
+        //var objects = MarsRover.ExploredObjects;
+        Dictionary<string, int> resourcesInRadius = new();
+        foreach (var coord in AdjacentCoordinates) 
+        {
+            foreach(var res in ResourceNodes)
+            {
+                if(coord == res.Coordinate)
+                {
+                    if (resourcesInRadius[res.Type] > 0)
+                    {
+                        resourcesInRadius[res.Type] += 1;
+                    }
+                    else
     {
         
     }
