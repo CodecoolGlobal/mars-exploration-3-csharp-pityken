@@ -25,14 +25,16 @@ public record Rover
     private readonly IMovementRoutine _returningRoutine;
     private readonly IGatheringRoutine _gatheringRoutine;
     private int currentExplorationStepNumber = 0;
+    private int _maxInventorySize = 5;
 
-    public Rover(IMovementRoutine exploringRoutine, 
-        IMovementRoutine returningRoutine, 
-        IGatheringRoutine gatheringRoutine, 
-        int id, 
-        Coordinate deployPosition, 
-        int sight, 
-        int maxExplorationStepCount)
+    public Rover(IMovementRoutine exploringRoutine,
+        IMovementRoutine returningRoutine,
+        IGatheringRoutine gatheringRoutine,
+        int id,
+        Coordinate deployPosition,
+        int sight,
+        int maxExplorationStepCount,
+        int maxInventorySize)
     {
         Id = $"rover-{id}";
         Sight = sight;
@@ -45,6 +47,7 @@ public record Rover
         MaxExplorationStepCount = maxExplorationStepCount;
 
         SetPosition(deployPosition);
+        _maxInventorySize = maxInventorySize;
     }
 
     private void SetPosition(Coordinate coordinate)
