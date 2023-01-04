@@ -2,6 +2,7 @@
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 using Codecool.MarsExploration.MapExplorer.Extensions;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
+using Codecool.MarsExploration.MapExplorer.Logger;
 
 namespace Codecool.MarsExploration.MapExplorer.CommandCenter.Model;
 
@@ -16,28 +17,31 @@ public class CommandCenter
     public bool ExploringRoverNeeded { get; init; }
     public CommandCenterStatus CommandCenterStatus { get; set; }
     private readonly ICommandCenterAction _roverBuilderAction;
-    
+    private Rover MarsRover;
+    private Dictionary<string, HashSet<Coordinate>> DiscResources;
 
     public CommandCenter(
         int id, 
         Rover builderRover, 
         Coordinate position, 
         int radius, 
-        Dictionary<string, int> resources, 
         Dictionary<string, HashSet<Coordinate>> discoveredResources, 
+        Dictionary<string, int> resources, 
         List<ResourceNode> resourceNodes, 
         bool exploringRoverNeeded, 
         ICommandCenterAction roverBuilderAction)
     {
         Id = $"base-{id}";
+        MarsRover = builderRover;
         Position = position;
         Radius = radius;
-        AdjacentCoordinates = position.GetAdjacentCoordinates(radius).ToList();
+        DiscResources = discoveredResources;
+        Resources = resources; //Resources in Inventory
         ResourceNodes = resourceNodes;
-        Resources = resources;
         ExploringRoverNeeded = exploringRoverNeeded;
-        CommandCenterStatus = CommandCenterStatus.UnderConstruction;
         _roverBuilderAction = roverBuilderAction;
+        AdjacentCoordinates = position.GetAdjacentCoordinates(radius).ToList();
+        CommandCenterStatus = CommandCenterStatus.UnderConstruction;
     }
 
     public void AddToResources(Dictionary<string, int> resources)
@@ -50,6 +54,7 @@ public class CommandCenter
 
     public Rover? CcUpdateStatus(int roverCost, int ccCost)
     {
+        var ResourcesInSight = GetResourcesInRadius(ResourceNodes);
         var numberOfRoversNeeded = ResourceNodes.Count();
 
         int Minerals = Resources["mineral"];
@@ -108,7 +113,7 @@ public class CommandCenter
                         resourcesInRadius[res.Type] += 1;
                     }
                     else
-    {
+                    {
                         resourcesInRadius.Add(res.Type, 1);
                     }
                 }
