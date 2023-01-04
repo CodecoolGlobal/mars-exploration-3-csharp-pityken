@@ -3,6 +3,7 @@ using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 using Codecool.MarsExploration.MapExplorer.Extensions;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 using Codecool.MarsExploration.MapExplorer.Logger;
+using Codecool.MarsExploration.MapExplorer.CommandCenter.Services.AssemblingRoutine;
 
 namespace Codecool.MarsExploration.MapExplorer.CommandCenter.Model;
 
@@ -20,7 +21,7 @@ public class CommandCenter
     public CommandCenterStatus CommandCenterStatus { get; set; }
     private readonly ICommandCenterAction _roverBuilderAction;
     private Rover MarsRover;
-    private Dictionary<string, HashSet<Coordinate>> DiscResources;
+    private IAssemblyRoutine AssemblyRoutine;
 
     public CommandCenter(
         int id, 
@@ -31,18 +32,19 @@ public class CommandCenter
         Dictionary<string, int> resources, 
         List<ResourceNode> resourceNodes, 
         bool exploringRoverNeeded, 
+        IAssemblyRoutine assemblyRoutine,
         ICommandCenterAction roverBuilderAction)
     {
         Id = $"base-{id}";
         MarsRover = builderRover;
         Position = position;
         Radius = radius;
-        DiscResources = discoveredResources;
         Resources = resources; //Resources in Inventory
-        ResourceNodes = resourceNodes;
+        ResourceNodes = GetResourcesInSight(discoveredResources);
         ExploringRoverNeeded = exploringRoverNeeded;
         _roverBuilderAction = roverBuilderAction;
         BuildProgress = 0;
+        AssemblyRoutine = assemblyRoutine;
         AssemblyProgress = 0;
         AdjacentCoordinates = position.GetAdjacentCoordinates(radius).ToList();
         CommandCenterStatus = CommandCenterStatus.UnderConstruction;
@@ -58,7 +60,6 @@ public class CommandCenter
 
     public Rover? CcUpdateStatus(int roverCost, int ccCost)
     {
-        var ResourcesInSight = GetResourcesInRadius(ResourceNodes);
         var numberOfRoversNeeded = ResourceNodes.Count();
 
         int Minerals = Resources["mineral"];
@@ -102,27 +103,20 @@ public class CommandCenter
         return false;
     }
 
-    private Dictionary<string, int> GetResourcesInRadius(List<ResourceNode> ResourceNodes)
+
+    private List<ResourceNode> GetResourcesInSight(Dictionary<string, HashSet<Coordinate>> discoveredResources)
     {
-        //var objects = MarsRover.ExploredObjects;
-        Dictionary<string, int> resourcesInRadius = new();
-        foreach (var coord in AdjacentCoordinates) 
+        List<ResourceNode> resources = new List<ResourceNode>();
+        foreach(var discResource in discoveredResources)
         {
-            foreach(var res in ResourceNodes)
+            foreach(Coordinate coord in AdjacentCoordinates)
             {
-                if(coord == res.Coordinate)
+                if(discResource.Value.Any(x => x.X == coord.X && x.Y == coord.Y))
                 {
-                    if (resourcesInRadius[res.Type] > 0)
-                    {
-                        resourcesInRadius[res.Type] += 1;
-                    }
-                    else
-                    {
-                        resourcesInRadius.Add(res.Type, 1);
-                    }
+                    resources.Add(new ResourceNode(discResource.Key, coord, false));
                 }
             }
         }
-        return resourcesInRadius;
+        return resources;
     }
 }
