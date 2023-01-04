@@ -29,4 +29,13 @@ public class CommandCenter
         _roverBuilderAction = roverBuilderAction;
     }
 
+    public void AddToResources(Dictionary<string, int> resources)
+    {
+        foreach (var resource in resources)
+        {
+            Resources.Add(resource.Key, resource.Value);
+        }
+    }
+
+
 }
