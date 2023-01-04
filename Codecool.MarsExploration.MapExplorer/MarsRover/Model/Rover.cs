@@ -93,6 +93,12 @@ public record Rover
         // _buildingRoutine.Build(AssignedCommandCenter);
     }
 
+    public void MoveBack()
+    {
+        Coordinate returnCoordinate = PositionHistory[PositionHistory.Count - 2];
+        CurrentPosition = returnCoordinate;
+    }
+
     //public bool CheckCommandCenterBuildibility(int resourcesNeededForCommandCenter)
     //{
     //    if (AssignedCommandCenter is null)
