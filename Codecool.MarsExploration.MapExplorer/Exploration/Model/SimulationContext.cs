@@ -17,8 +17,11 @@ public record SimulationContext
     public IDictionary<string, string> ResourcesToScan { get; init; }
     public ExplorationOutcome ExplorationOutcome { get; set; }
     public string LogFilePath { get; init; }
+    public int ResourcesNeededForCommandCenter { get; init; }
+    public int ResourcesNeededForRover { get; init; }
+    public int MaxRoverInventorySize { get; init; }
 
-    public SimulationContext(int maxSteps, Rover startingRover, Coordinate spaceShipLocation, Map map, IDictionary<string, string> resourcesToScan, string logFilePath, int commandCentersNeeded)
+    public SimulationContext(int maxSteps, Rover startingRover, Coordinate spaceShipLocation, Map map, IDictionary<string, string> resourcesToScan, string logFilePath, int commandCentersNeeded, int resourcesNeededForCommandCenter, int resourcesNeededForRover, int maxRoverInventorySize)
     {
         CurrentStepNumber = 0;
         MaxSteps = maxSteps;
@@ -31,6 +34,9 @@ public record SimulationContext
         CommandCentersNeeded = commandCentersNeeded;
 
         Rovers.Add(startingRover);
+        ResourcesNeededForCommandCenter = resourcesNeededForCommandCenter;
+        ResourcesNeededForRover = resourcesNeededForRover;
+        MaxRoverInventorySize = maxRoverInventorySize;
     }
 
 }

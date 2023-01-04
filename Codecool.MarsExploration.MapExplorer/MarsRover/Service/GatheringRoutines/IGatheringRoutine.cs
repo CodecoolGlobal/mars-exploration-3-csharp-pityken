@@ -1,4 +1,5 @@
 ﻿using Codecool.MarsExploration.MapExplorer.CommandCenter.Model;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 
 namespace Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutines;
@@ -6,9 +7,9 @@ namespace Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutin
 public interface IGatheringRoutine
 {
     Coordinate GatherResource(
-        ResourceNode resourceNode, 
-        Coordinate commandCenterCoordinate, 
-        Coordinate RoverPsition, 
-        Dictionary<string, int> Inventory, 
-        int inventorySize);
+        ResourceNode resourceNode,
+        CommandCenter.Model.CommandCenter commandCenter,
+        Rover rover,
+        int mapDimension
+        );
 }

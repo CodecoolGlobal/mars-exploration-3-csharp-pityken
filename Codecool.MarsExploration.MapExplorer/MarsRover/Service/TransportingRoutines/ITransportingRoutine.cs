@@ -4,5 +4,5 @@ namespace Codecool.MarsExploration.MapExplorer.MarsRover.Service.TransportingRou
 
 public interface ITransportingRoutine
 {
-    Coordinate MoveToCoordinate(Coordinate coordinate);
+    Coordinate MoveToCoordinate(Coordinate coordinate, Coordinate roverCoordinate);
 }

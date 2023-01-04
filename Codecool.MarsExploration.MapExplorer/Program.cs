@@ -12,6 +12,8 @@ using Codecool.MarsExploration.MapExplorer.MarsRover.Service.MovementRoutines;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 using Codecool.MarsExploration.MapGenerator.MapElements.Model;
 using Codecool.MarsExploration.MapExplorer.Configuration.Service;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutines;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Service.TransportingRoutines;
 using Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSteps;
 
 namespace Codecool.MarsExploration.MapExplorer;
@@ -27,6 +29,10 @@ class Program
         Coordinate landingSpot = new Coordinate(6, 6);
         Dictionary<string, string> resourcesToScan = new() { { "water", "*" }, { "mineral", "%" } };
         int maxSteps = 1000;
+        int commandCentersNeeded = 3;
+        int resourcesNeededForCommandCenter = 50;
+        int resourcesNeededForRover = 15;
+        int maxRoverInventorySize = 5;
         string logFilePath = $"{WorkDir}\\Logs\\{DateTime.Now:yyyyMMdd_HHmmss}.log";
 
         ConfigurationRecord configuration = new ConfigurationRecord(mapFile, landingSpot, resourcesToScan, maxSteps);
@@ -42,13 +48,15 @@ class Program
 
             IMovementRoutine exploringRoutine = new RandomExploringRoutine();
             IMovementRoutine returningRoutine = new BasicReturningRoutine();
+            ITransportingRoutine transportingRoutine = new TransportingRoutine(map);
+            IGatheringRoutine gatheringRoutine = new GatheringRoutine(transportingRoutine); 
 
             int id = 1;
             int sight = 5;
-            IRoverDeployer roverDeployer = new RoverDeployer(exploringRoutine, returningRoutine, id, sight, configuration.LandingSpot, map);
+            IRoverDeployer roverDeployer = new RoverDeployer(exploringRoutine, returningRoutine, id, sight, configuration.LandingSpot, map, gatheringRoutine, maxRoverInventorySize);
             Rover MarsRover = roverDeployer.Deploy();
 
-            SimulationContext simulationContext = new SimulationContext(configuration.MaxSteps, MarsRover, configuration.LandingSpot, map, configuration.ResourcesToScan, logFilePath);
+            SimulationContext simulationContext = new SimulationContext(configuration.MaxSteps, MarsRover, configuration.LandingSpot, map, configuration.ResourcesToScan, logFilePath, commandCentersNeeded, resourcesNeededForCommandCenter, resourcesNeededForRover, maxRoverInventorySize);
 
             IEnumerable<ILogger> loggers = new List<ILogger>()
             {
@@ -56,7 +64,7 @@ class Program
                 new FileLogger(logFilePath),
             };
 
-            IOutcomeDeterminer outcomeDeterminer = new OutcomeDeterminer();
+            IOutcomeDeterminer outcomeDeterminer = new ColonizationOutcomeDeterminer();
             ISimulationStep simulationStep = new SimulationStep(simulationContext, outcomeDeterminer, loggers);
 
             IExplorationSummaryGenerator explorationSimulationGenerator = new ExplorationSummaryGenerator();
@@ -67,6 +75,8 @@ class Program
             IFoundResourcesExporter foundResourcesExporter = new FoundResourcesExporter(foundResourcesGenerator, foundResourcesRepository);
             
             IExplorationSimulator explorationSimulator = new ExplorationSimulator(simulationContext, simulationStep, explorationSummaryExporter, foundResourcesExporter);
+
+            
 
             explorationSimulator.Run();
 

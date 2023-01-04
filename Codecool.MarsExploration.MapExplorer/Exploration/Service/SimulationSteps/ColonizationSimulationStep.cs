@@ -26,6 +26,8 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
         {
             ActWithRovers();
             ActWithCommandCenters();
+            //exportToDb
+            _simulationContext.CurrentStepNumber++;
             return GetExplorationOutcome();
         }
 
@@ -36,7 +38,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 if (!CommandCenterAssignedToRover(r))
                 {
                     r.Move(_simulationContext.Map.Dimension);
-
+                    
                 }
                 else if (CommandCenterAssignedToRover(r) && ResourceNodeAssignedToRover(r))
                 {
@@ -47,6 +49,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 {
                     throw new Exception($"There is no ResourceNode assigned to the mining rover: {r.Id}");
                 }
+                //log
             });
         }
 
@@ -57,6 +60,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 if (c.CommandCenterStatus != CommandCenter.Model.CommandCenterStatus.UnderConstruction)
                 {
                     c.UpdateStatus();
+                    //log
                 }
             });
         }
@@ -68,7 +72,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private bool CommandCenterAssignedToRover(Rover rover)
         {
-            return rover.CommandCenter != null;
+            return rover.AssignedCommandCenter != null;
         }
 
         private bool ResourceNodeAssignedToRover(Rover rover)
@@ -78,12 +82,12 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private bool CommandCenterBesidesTheRover(Rover rover)
         {
-            return rover.CommandCenter != null ? rover.CommandCenter.AdjacentCoordinates.Contains(rover.CurrentPosition) : false;
+            return rover.AssignedCommandCenter != null ? rover.AssignedCommandCenter.AdjacentCoordinates.Contains(rover.CurrentPosition) : false;
         }
 
         private void CheckCommandCenterBuildRequirements(Rover rover)
         {
-            if (CommandCenterBesidesTheRover(rover) && CommandCenterHasNotBuiltYet(rover.CommandCenter) && HasAllResourcesToBuild(rover.CommandCenter))
+            if (CommandCenterBesidesTheRover(rover) && CommandCenterHasNotBuiltYet(rover.AssignedCommandCenter) && HasAllResourcesToBuild(rover.AssignedCommandCenter))
             {
 
             }
