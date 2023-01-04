@@ -72,6 +72,8 @@ class Program
             
             IExplorationSimulator explorationSimulator = new ExplorationSimulator(simulationContext, simulationStep, explorationSummaryExporter, foundResourcesExporter);
 
+            ITransportingRoutine transportingRoutine = new TransportingRoutine(map);
+
             explorationSimulator.Run();
 
         }
