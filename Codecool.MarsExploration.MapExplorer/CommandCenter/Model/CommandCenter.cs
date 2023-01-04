@@ -52,6 +52,11 @@ public class CommandCenter
     {
         var numberOfRoversNeeded = ResourceNodes.Count();
 
+        int Minerals = Resources["mineral"];
+        int Water = Resources["water"];
+
+        
+
         if (ResourceNodes.Any(x => !x.HasRoverAssinged) && Minerals >= roverCost )
         {
             CommandCenterStatus = CommandCenterStatus.RoverProduction;
