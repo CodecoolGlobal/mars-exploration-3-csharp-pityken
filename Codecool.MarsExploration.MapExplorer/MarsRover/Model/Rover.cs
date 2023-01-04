@@ -88,9 +88,12 @@ public record Rover
         return true;
     }
 
-    public void BuildCommandCenter(CommandCenter.Model.CommandCenter commandCenter)
+    public void BuildCommandCenter()
     {
-        // _buildingRoutine.Build(AssignedCommandCenter);
+        if (AssignedCommandCenter is not null && AssignedCommandCenter.AdjacentCoordinates.Contains(CurrentPosition))
+        {
+            _buildingRoutine.Build(AssignedCommandCenter);
+        }
     }
 
     //public bool CheckCommandCenterBuildibility(int resourcesNeededForCommandCenter)
