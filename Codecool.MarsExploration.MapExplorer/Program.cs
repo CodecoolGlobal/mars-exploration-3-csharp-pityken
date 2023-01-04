@@ -44,7 +44,7 @@ class Program
 
             IMovementRoutine exploringRoutine = new RandomExploringRoutine();
             IMovementRoutine returningRoutine = new BasicReturningRoutine();
-            ITransportingRoutine transportingRoutine = null;
+            ITransportingRoutine transportingRoutine = new TransportingRoutine(map);
             IGatheringRoutine gatheringRoutine = new GatheringRoutine(transportingRoutine); 
 
             int id = 1;
@@ -72,7 +72,7 @@ class Program
             
             IExplorationSimulator explorationSimulator = new ExplorationSimulator(simulationContext, simulationStep, explorationSummaryExporter, foundResourcesExporter);
 
-            ITransportingRoutine transportingRoutine = new TransportingRoutine(map);
+            
 
             explorationSimulator.Run();
 
