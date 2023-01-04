@@ -20,6 +20,7 @@ public record Rover
     public Dictionary<string, int> Inventory { get; set; }
     public Dictionary<string, HashSet<Coordinate>> ExploredObjects { get; set; }
     public List<Coordinate> PositionHistory { get; }
+    public int CurrentExplorationStepNumber { get; private set; }
 
     public ResourceNode? ResourceNode { get; private set; }
     //public int AssemblyStatus { get; private set;  }
@@ -28,7 +29,6 @@ public record Rover
     private readonly IMovementRoutine _returningRoutine;
     private readonly IGatheringRoutine _gatheringRoutine;
     private readonly IBuidingRoutine _buildingRoutine;
-    private int currentExplorationStepNumber = 0;
 
 
     public Rover(IMovementRoutine exploringRoutine,
@@ -54,6 +54,7 @@ public record Rover
 
         SetPosition(deployPosition);
         _buildingRoutine = buildingRoutine;
+        CurrentExplorationStepNumber = 0;
     }
 
     private void SetPosition(Coordinate coordinate)
@@ -69,6 +70,7 @@ public record Rover
         if (oldPosition != newPosition)
         {
             SetPosition(newPosition);
+            CurrentExplorationStepNumber++;
             return true;
         }
         return false;
