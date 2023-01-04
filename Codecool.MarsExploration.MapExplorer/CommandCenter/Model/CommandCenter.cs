@@ -48,6 +48,8 @@ public class CommandCenter
         AssemblyProgress = 0;
         AdjacentCoordinates = position.GetAdjacentCoordinates(radius).ToList();
         CommandCenterStatus = CommandCenterStatus.UnderConstruction;
+        builderRover.AssignCommandCenter(this);
+        AssignResourceNodeToRover(builderRover);
     }
 
     public void AddToResources(Dictionary<string, int> resources)
@@ -56,6 +58,16 @@ public class CommandCenter
         {
             Resources.Add(resource.Key, resource.Value);
         }
+    }
+    
+    public void AssignResourceNodeToRover(Rover rover) //rover has built => run
+    {
+        var mineralResource = ResourceNodes.Count(r => r.HasRoverAssinged == true) == 0 
+            ? ResourceNodes.First(x => x.Type == "mineral") 
+            : ResourceNodes.First(x => x.HasRoverAssinged == false);
+
+        rover.AssignResourceNode(mineralResource);
+        mineralResource.HasRoverAssinged = true;
     }
 
     public Rover? CcUpdateStatus(int roverCost, int ccCost)
