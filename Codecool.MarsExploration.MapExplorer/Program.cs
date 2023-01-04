@@ -29,6 +29,9 @@ class Program
         Dictionary<string, string> resourcesToScan = new() { { "water", "*" }, { "mineral", "%" } };
         int maxSteps = 1000;
         int commandCentersNeeded = 3;
+        int resourcesNeededForCommandCenter = 50;
+        int resourcesNeededForRover = 15;
+        int maxRoverInventorySize = 5;
         string logFilePath = $"{WorkDir}\\Logs\\{DateTime.Now:yyyyMMdd_HHmmss}.log";
 
         ConfigurationRecord configuration = new ConfigurationRecord(mapFile, landingSpot, resourcesToScan, maxSteps);
@@ -49,10 +52,10 @@ class Program
 
             int id = 1;
             int sight = 5;
-            IRoverDeployer roverDeployer = new RoverDeployer(exploringRoutine, returningRoutine, id, sight, configuration.LandingSpot, map, gatheringRoutine);
+            IRoverDeployer roverDeployer = new RoverDeployer(exploringRoutine, returningRoutine, id, sight, configuration.LandingSpot, map, gatheringRoutine, maxRoverInventorySize);
             Rover MarsRover = roverDeployer.Deploy();
 
-            SimulationContext simulationContext = new SimulationContext(configuration.MaxSteps, MarsRover, configuration.LandingSpot, map, configuration.ResourcesToScan, logFilePath, commandCentersNeeded);
+            SimulationContext simulationContext = new SimulationContext(configuration.MaxSteps, MarsRover, configuration.LandingSpot, map, configuration.ResourcesToScan, logFilePath, commandCentersNeeded, resourcesNeededForCommandCenter, resourcesNeededForRover, maxRoverInventorySize);
 
             IEnumerable<ILogger> loggers = new List<ILogger>()
             {

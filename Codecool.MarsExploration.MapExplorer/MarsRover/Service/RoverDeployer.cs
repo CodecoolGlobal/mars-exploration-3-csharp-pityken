@@ -16,9 +16,10 @@ public class RoverDeployer : IRoverDeployer
     private readonly int _id;
     private readonly int _sight;
     private readonly Coordinate _deployPoint;
+    private readonly int _maxRoverInventorySize;
     private static readonly Random _random = new();
 
-    public RoverDeployer(IMovementRoutine exploringRoutine, IMovementRoutine returningRoutine, int id, int sight, Coordinate shipLocation, Map map, IGatheringRoutine gatheringRoutine)
+    public RoverDeployer(IMovementRoutine exploringRoutine, IMovementRoutine returningRoutine, int id, int sight, Coordinate shipLocation, Map map, IGatheringRoutine gatheringRoutine, int maxRoverInventorySize)
     {
         _exploringRoutine = exploringRoutine;
         _returningRoutine = returningRoutine;
@@ -27,6 +28,7 @@ public class RoverDeployer : IRoverDeployer
         _sight = sight;
         _map = map;
         _gatheringRoutine = gatheringRoutine;
+        _maxRoverInventorySize = maxRoverInventorySize;
     }
 
     public Rover Deploy()
@@ -41,7 +43,7 @@ public class RoverDeployer : IRoverDeployer
         if (deployPosition is null)
             throw new Exception("Rover cannot be placed");
 
-        return new Rover(_exploringRoutine, _returningRoutine, _gatheringRoutine, _id, deployPosition, _sight);
+        return new Rover(_exploringRoutine, _returningRoutine, _gatheringRoutine, _id, deployPosition, _sight, _maxRoverInventorySize);
     }
 
     private Coordinate? GetRandomEmptyAdjacentCoordinate(Coordinate[] adjacentCoordinates)
