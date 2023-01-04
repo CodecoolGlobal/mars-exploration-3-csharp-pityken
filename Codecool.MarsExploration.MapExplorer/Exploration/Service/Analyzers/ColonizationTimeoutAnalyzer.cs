@@ -6,9 +6,8 @@ public class ColonizationTimeoutAnalyzer : IAnalyzer
 {
     public ExplorationOutcome Analyze(SimulationContext simulationContext)
     {
-        var rovers = simulationContext.Rovers;
         bool timeout = false;
-        foreach (var rover in rovers)
+        foreach (var rover in simulationContext.Rovers)
         {
             if (rover.MaxExplorationStepCount >= simulationContext.MaxSteps)
             {
