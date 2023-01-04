@@ -12,6 +12,7 @@ using Codecool.MarsExploration.MapExplorer.MarsRover.Service.MovementRoutines;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 using Codecool.MarsExploration.MapGenerator.MapElements.Model;
 using Codecool.MarsExploration.MapExplorer.Configuration.Service;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Service.TransportingRoutines;
 
 namespace Codecool.MarsExploration.MapExplorer;
 
@@ -66,6 +67,8 @@ class Program
             IFoundResourcesExporter foundResourcesExporter = new FoundResourcesExporter(foundResourcesGenerator, foundResourcesRepository);
             
             IExplorationSimulator explorationSimulator = new ExplorationSimulator(simulationContext, simulationStep, explorationSummaryExporter, foundResourcesExporter);
+
+            ITransportingRoutine transportingRoutine = new TransportingRoutine(map);
 
             explorationSimulator.Run();
 
