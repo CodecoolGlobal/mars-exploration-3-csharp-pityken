@@ -51,8 +51,6 @@ public class CommandCenter
     public Rover? CcUpdateStatus(int roverCost, int ccCost)
     {
         var numberOfRoversNeeded = ResourceNodes.Count();
-        int Minerals = 0;
-        int Water = 0;
 
         if (ResourceNodes.Any(x => !x.HasRoverAssinged) && Minerals >= roverCost )
         {
