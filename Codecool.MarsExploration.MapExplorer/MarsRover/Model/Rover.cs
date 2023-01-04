@@ -20,7 +20,7 @@ public record Rover
     public List<Coordinate> PositionHistory { get; }
     public int CurrentExplorationStepNumber { get; private set; }
     public ResourceNode? ResourceNode { get; private set; }
-    public int AssemblyProgress { get; private set;  }
+    //public int AssemblyProgress { get; private set;  }
 
     private readonly IMovementRoutine _exploringRoutine;
     private readonly IMovementRoutine _returningRoutine;
@@ -40,7 +40,7 @@ public record Rover
     {
         Id = $"rover-{id}";
         Sight = sight;
-        AssemblyProgress = 0;
+        //AssemblyProgress = 0;
         _exploringRoutine = exploringRoutine;
         _returningRoutine = returningRoutine;
         _gatheringRoutine = gatheringRoutine;
