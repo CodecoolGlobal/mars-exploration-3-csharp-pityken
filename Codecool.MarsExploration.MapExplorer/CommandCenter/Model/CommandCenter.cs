@@ -16,7 +16,7 @@ public class CommandCenter
     public int AssemblyProgress { get; set; }
     public List<ResourceNode> ResourceNodes { get; init; }
     public Dictionary<string, int> Resources { get; set; }
-    public bool ExploringRoverNeeded { get; init; }
+    public bool ExploringRoverNeeded { get; private set; }
     public CommandCenterStatus CommandCenterStatus { get; set; }
     private readonly IAssemblyRoutine _assemblyRoutine;
 
@@ -68,46 +68,33 @@ public class CommandCenter
         mineralResource.HasRoverAssinged = true;
     }
 
-    public Rover? CcUpdateStatus(int roverCost, int ccCost)
+    public Rover? UpdateStatus(int roverCost)
     {
-        var numberOfRoversNeeded = ResourceNodes.Count();
-
         int Minerals = Resources["mineral"];
-        int Water = Resources["water"];
 
-        
-
-        if (ResourceNodes.Any(x => !x.HasRoverAssinged) && Minerals >= roverCost )
+        if (ResourceNodes.Any(x => !x.HasRoverAssinged) && Minerals >= roverCost)
         {
-            CommandCenterStatus = CommandCenterStatus.RoverProduction;
-            return _assemblyRoutine.Assemble(this);
+            return AssembleRover(roverCost, false);
         }
 
-        if (IsConstructable(ccCost, Minerals))
+        else if (ExploringRoverNeeded && Minerals >= roverCost)
         {
-            CommandCenterStatus = CommandCenterStatus.UnderConstruction;
-            return null;
-        }
-
-        if (ExploringRoverNeeded && ResourceNodes.Any(x => x.HasRoverAssinged))
-        {
-            CommandCenterStatus = CommandCenterStatus.RoverProduction;
-            return _assemblyRoutine.Assemble(this);
+            var assemblyStatus = AssembleRover(roverCost, true);
+            if (assemblyStatus != null)
+            {
+                ExploringRoverNeeded = false;
+            }
+            return assemblyStatus;
         }
 
         CommandCenterStatus = CommandCenterStatus.Idle;
         return null;
-
-
     }
+
 
     public bool IsConstructable(int resourceNeeded, int totalResource)
     {
-        if (CommandCenterStatus == CommandCenterStatus.UnderConstruction && resourceNeeded >= totalResource)
-        { 
-            return true;
-        }
-        return false;
+        return CommandCenterStatus == CommandCenterStatus.UnderConstruction && resourceNeeded <= totalResource;
     }
 
 
@@ -125,5 +112,24 @@ public class CommandCenter
             }
         }
         return resources;
+    }
+
+    private Rover? AssembleRover(int roverCost, bool exploring)
+    {
+        CommandCenterStatus = CommandCenterStatus.RoverProduction;
+        var roverAssemblyStatus = _assemblyRoutine.Assemble(this);
+        if (roverAssemblyStatus != null)
+        {
+            Resources["mineral"] -= roverCost;
+
+            if (!exploring)
+            {
+                AssignResourceAndCommandCenterToTheRover(roverAssemblyStatus);
+            }
+
+            CommandCenterStatus = CommandCenterStatus.Idle;
+        }
+
+        return roverAssemblyStatus;
     }
 }
