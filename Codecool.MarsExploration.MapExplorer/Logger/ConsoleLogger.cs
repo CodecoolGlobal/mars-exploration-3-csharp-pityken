@@ -5,15 +5,30 @@ namespace Codecool.MarsExploration.MapExplorer.Logger;
 
 public class ConsoleLogger : ILogger
 {
-    public void ActionLog(int stepNumber, string actionType, string name, string? target = null, string? currentProgress = null, string? maxProgress = null)
+    public void ActionLog(
+        int stepNumber, 
+        string actionType, 
+        string name, 
+        string? target = null, 
+        string? currentProgress = null, 
+        string? maxProgress = null, 
+        Coordinate? position = null)
     {
-        if (target == null || currentProgress == null || maxProgress == null)
+        string logstring = $"STEP {stepNumber}; EVENT {actionType}; UNIT {name};";
+        if (target != null)
         {
-            Console.WriteLine($"STEP {stepNumber}; EVENT {actionType}; UNIT {name};");
-        } else
-        {
-            Console.WriteLine($"STEP {stepNumber}; EVENT {actionType}; UNIT {name}; TARGET {target}; PROGRESS {currentProgress} of {maxProgress};");
+            logstring += $" TARGET {target};";
         }
+        if (currentProgress != null && maxProgress != null)
+        {
+            logstring += $" PROGRESS {currentProgress} of {maxProgress};";
+        }
+        if (position != null)
+        {
+            logstring += $" POSITION [{position.X},{position.Y}];";
+        }
+
+        Console.WriteLine(logstring);
     }
 
     public void Log(string message)
