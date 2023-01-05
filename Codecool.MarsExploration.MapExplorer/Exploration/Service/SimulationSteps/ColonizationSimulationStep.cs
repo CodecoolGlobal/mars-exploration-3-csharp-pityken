@@ -5,11 +5,6 @@ using Codecool.MarsExploration.MapExplorer.Exploration.Model;
 using Codecool.MarsExploration.MapExplorer.Logger;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSteps
 {
@@ -48,7 +43,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 {
                     if (_commandCenterBuildableDeterminer.Determine(_simulationContext, r.Id))
                     {
-                        CommandCenter.Model.CommandCenter commandcenter = commandCenterDeployer.Deploy(r);
+                        var commandcenter = commandCenterDeployer.Deploy(r);
                         commandcenter.AssignResourceAndCommandCenterToTheRover(r);
                         r.MoveBack();
                         //log
@@ -125,13 +120,13 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private bool CommandCenterBesidesTheRover(Rover rover)
         {
-            return rover.AssignedCommandCenter != null ? rover.AssignedCommandCenter.AdjacentCoordinates.Contains(rover.CurrentPosition) : false;
+            return rover.AssignedCommandCenter != null && rover.AssignedCommandCenter.AdjacentCoordinates.Contains(rover.CurrentPosition);
         }
 
         private bool BuildCommandCenterIfNeeded(Rover rover)
         {
             if (CommandCenterBesidesTheRover(rover)
-                && CommandCenterHasNotBuiltYet(rover.AssignedCommandCenter) 
+                && CommandCenterHasNotBuiltYet(rover.AssignedCommandCenter)
                 && HasAllResourcesToBuild(rover.AssignedCommandCenter))
             {
                 rover.BuildCommandCenter();
@@ -154,12 +149,18 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private void ActionLog(string actionType, string name, string? target = null, string? currentProgress = null, string? maxProgress = null, Coordinate? position = null)
         {
-
+            foreach (var log in _loggers)
+            {
+                log.ActionLog(_simulationContext.CurrentStepNumber, actionType, name, target, currentProgress, maxProgress);
+            }
         }
 
         private void OutComeLog()
         {
-
+            foreach (var log in _loggers)
+            {
+                log.OutcomeLog(_simulationContext.CurrentStepNumber, _simulationContext.ExplorationOutcome);
+            }
         }
     }
 }
