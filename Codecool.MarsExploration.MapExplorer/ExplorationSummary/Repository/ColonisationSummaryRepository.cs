@@ -16,7 +16,7 @@ public class ColonisationSummaryRepository : IColonisationSummaryRepository
     {
         string tableName = "rovers";
         string query = $"INSERT INTO {tableName}(" +
-            $"rover_id," +
+            $"rover_id" +
             $")" +
             $"VALUES(" +
             $"'{roverSummary.RoverId}')";
@@ -32,7 +32,7 @@ public class ColonisationSummaryRepository : IColonisationSummaryRepository
     {
         string tableName = "command_centers";
         string query = $"INSERT INTO {tableName}(" +
-            $"command_center_id," +
+            $"command_center_id" +
             $")" +
             $"VALUES(" +
             $"'{commandCenterSummary.CommandCenterId}')";
@@ -66,14 +66,14 @@ public class ColonisationSummaryRepository : IColonisationSummaryRepository
         // int construction_id auto generated
         string query = $"INSERT INTO {tableName}(" +
             $"constructed_object_id," +
-            $"constructor_object_id," +
+            $"constructor_object_id" +
             $")" +
             $"VALUES(" +
             $"'{constructionSummary.ConstructedObjectId}'," +
             $"'{constructionSummary.ConstructorObjectId}')";
         ExecuteNonQuery(query);
 
-        int constructionId = GetLastConstructionId();
+        int constructionId = GetLastConstructionId(tableName);
         foreach (var materialSummary in constructionSummary.Resources)
         {
             materialSummary.ConstructionSummaryId = constructionId;
@@ -85,9 +85,9 @@ public class ColonisationSummaryRepository : IColonisationSummaryRepository
         }
     }
 
-    private int GetLastConstructionId()
+    private int GetLastConstructionId(string tableName)
     {
-        string query = "SELECT construction_id FROM table ORDER BY construction_id DESC LIMIT 1;";
+        string query = $"SELECT construction_id FROM {tableName} ORDER BY construction_id DESC LIMIT 1;";
         SqliteConnection connection = GetConnection();
         SqliteCommand command = GetCommand(query, connection);
         using SqliteDataReader sqliteDataReader = command.ExecuteReader();
@@ -150,7 +150,7 @@ public class ColonisationSummaryRepository : IColonisationSummaryRepository
         string query3 = $"DELETE FROM command_centers";
         string query4 = $"DELETE FROM command_centers_resources";
         string query5 = $"DELETE FROM constructions";
-        string query6 = $"DELETE FROM constructions_resources";
+        string query6 = $"DELETE FROM constructions_materials";
 
         ExecuteNonQuery(query1);
         ExecuteNonQuery(query2);

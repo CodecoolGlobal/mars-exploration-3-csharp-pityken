@@ -2,6 +2,7 @@
 using Codecool.MarsExploration.MapExplorer.CommandCenter.Services;
 using Codecool.MarsExploration.MapExplorer.CommandCenter.Services.AssemblingRoutine;
 using Codecool.MarsExploration.MapExplorer.Exploration.Model;
+using Codecool.MarsExploration.MapExplorer.ExplorationSummary.Exporter;
 using Codecool.MarsExploration.MapExplorer.Extensions;
 using Codecool.MarsExploration.MapExplorer.Logger;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
@@ -17,8 +18,9 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
         private readonly IAssemblyRoutine _assemblyRoutine;
         private readonly IEnumerable<ILogger> _loggers;
         private readonly ICommandCenterDeployer commandCenterDeployer;
+        private readonly IColonisationSummaryExporter _colonisationSummaryExporter;
 
-        public ColonizationSimulationStep(SimulationContext simulationContext, IOutcomeDeterminer outcomeDeterminer, IEnumerable<ILogger> loggers, IBuildableDeterminer commandCenterBuildableDeterminer, IAssemblyRoutine asseblyRoutine)
+        public ColonizationSimulationStep(SimulationContext simulationContext, IOutcomeDeterminer outcomeDeterminer, IEnumerable<ILogger> loggers, IBuildableDeterminer commandCenterBuildableDeterminer, IAssemblyRoutine asseblyRoutine, IColonisationSummaryExporter colonisationSummaryExporter)
         {
             _simulationContext = simulationContext;
             _outcomeDeterminer = outcomeDeterminer;
@@ -26,12 +28,13 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             _loggers = loggers;
             _assemblyRoutine = asseblyRoutine;
             commandCenterDeployer = new CommandCenterDeployer(_simulationContext.CommandCenterRadius, _assemblyRoutine, (Dictionary<string, string>)_simulationContext.ResourcesToScan, _simulationContext.Map.Dimension);
+            _colonisationSummaryExporter = colonisationSummaryExporter;
         }
         public ExplorationOutcome Step()
         {
             ActWithRovers();
             ActWithCommandCenters();
-            //exportToDb
+            _colonisationSummaryExporter.Export(_simulationContext);
             _simulationContext.CurrentStepNumber++;
             return GetExplorationOutcome();
         }
@@ -84,6 +87,9 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                     if (roverStatus != null)
                     {
                         _simulationContext.Rovers.Add(roverStatus);
+                        Dictionary<string, int> usedresources = new Dictionary<string, int>();
+                        usedresources.Add("mineral", _simulationContext.ResourcesNeededForRover);
+                        _colonisationSummaryExporter.ExportConstructionEvent(roverStatus.Id, c.Id, usedresources);
                         ActionLog("construction_complete", c.Id, roverStatus.Id);
                     }
                     if (c.CommandCenterStatus == CommandCenter.Model.CommandCenterStatus.RoverProduction)
@@ -128,6 +134,12 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             {
                 rover.BuildCommandCenter();
                 ActionLog("construction", rover.Id, rover.AssignedCommandCenter.Id, (rover.AssignedCommandCenter.BuildProgress/10).ToString(), "10");
+                if (rover.AssignedCommandCenter.BuildProgress == 100)
+                {
+                    Dictionary<string, int> usedResources = new Dictionary<string, int>();
+                    usedResources.Add("mineral", _simulationContext.ResourcesNeededForCommandCenter);
+                    _colonisationSummaryExporter.ExportConstructionEvent(rover.AssignedCommandCenter.Id, rover.Id, usedResources);
+                }
                 return true;
             }
 

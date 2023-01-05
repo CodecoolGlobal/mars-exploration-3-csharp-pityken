@@ -71,7 +71,6 @@ class Program
 
             IOutcomeDeterminer outcomeDeterminer = new ColonizationOutcomeDeterminer();
             IBuildableDeterminer buildableDeterminer = new CommandCenterBuildableDeterminer();
-            ISimulationStep simulationStep = new ColonizationSimulationStep(simulationContext, outcomeDeterminer, loggers, buildableDeterminer, assemblyRoutine);
 
             //IExplorationSummaryGenerator explorationSimulationGenerator = new ExplorationSummaryGenerator();
             //IExplorationSummaryRepository explorationSummaryRepository = new ExplorationSummaryRepository(repositoryFile);
@@ -79,7 +78,12 @@ class Program
             //IFoundResourcesGenerator foundResourcesGenerator = new FoundResourcesGenerator();
             //IFoundResourcesRepository foundResourcesRepository = new FoundResourcesRepository(repositoryFile);
             //IFoundResourcesExporter foundResourcesExporter = new FoundResourcesExporter(foundResourcesGenerator, foundResourcesRepository);
+
+            IColonisationSummaryRepository colonisationSummaryRepository = new ColonisationSummaryRepository(repositoryFile);
+            IColonisationSummaryGenerator colonisationSummaryGenerator = new ColonisationSummaryGenerator();
+            IColonisationSummaryExporter colonisationSummaryExporter = new ColonisationSummaryExporter(colonisationSummaryGenerator, colonisationSummaryRepository);
             
+            ISimulationStep simulationStep = new ColonizationSimulationStep(simulationContext, outcomeDeterminer, loggers, buildableDeterminer, assemblyRoutine, colonisationSummaryExporter);
             IExplorationSimulator explorationSimulator = new ColonizationSimulator(simulationStep, simulationContext);
 
             
