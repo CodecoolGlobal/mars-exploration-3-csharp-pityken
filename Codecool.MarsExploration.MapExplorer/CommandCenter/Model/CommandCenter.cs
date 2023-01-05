@@ -16,6 +16,7 @@ public class CommandCenter
     public int AssemblyProgress { get; set; }
     public List<ResourceNode> ResourceNodes { get; init; }
     public Dictionary<string, int> Resources { get; set; }
+    public Dictionary<string, int> TotalCollectedResources { get; set; }
     public bool ExploringRoverNeeded { get; private set; }
     public CommandCenterStatus CommandCenterStatus { get; set; }
     private readonly IAssemblyRoutine _assemblyRoutine;
@@ -35,6 +36,7 @@ public class CommandCenter
         Radius = radius;
         Resources = new Dictionary<string, int>(); //Resources in Inventory
         ResourceNodes = GetResourcesInSight(discoveredResources);
+        TotalCollectedResources = new Dictionary<string, int>();
         ExploringRoverNeeded = exploringRoverNeeded;
         BuildProgress = 0;
         _assemblyRoutine = assemblyRoutine;
@@ -54,7 +56,14 @@ public class CommandCenter
     {
         foreach (var resource in resources)
         {
-            Resources.Add(resource.Key, resource.Value);
+            if (!Resources.ContainsKey(resource.Key))
+            {
+                Resources.Add(resource.Key, resource.Value);
+            }
+            else
+            {
+                Resources[resource.Key] += resource.Value;
+            }
         }
     }
     
