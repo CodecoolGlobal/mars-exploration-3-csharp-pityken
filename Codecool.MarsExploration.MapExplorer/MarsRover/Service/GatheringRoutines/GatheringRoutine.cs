@@ -41,7 +41,7 @@ public class GatheringRoutine : IGatheringRoutine
                     rover.TotalCollectedResources[resourceNode.Type]++;
             }
 
-            return (rover.CurrentPosition, GatheringState.Extraction);
+            return (rover.CurrentPosition, GatheringState.extraction);
         }
 
         if (adjacentCoordinatesOfCommandCenter.Contains(rover.CurrentPosition) && hasCollectedResource)
@@ -53,18 +53,18 @@ public class GatheringRoutine : IGatheringRoutine
                 rover.RemoveFromInventory(resourceNode);
             }
            
-            return (rover.CurrentPosition, GatheringState.Unload);
+            return (rover.CurrentPosition, GatheringState.unload);
         }
 
         if (!hasCollectedResource)
         {
             Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(GetEmptyAdjecentCoordinate(adjacentCoordinatesOfResource, rover), rover.CurrentPosition);
-            return (newCoordinate, GatheringState.Delivery);
+            return (newCoordinate, GatheringState.delivery);
         }
         else
         {
             Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(GetEmptyAdjecentCoordinate(adjacentCoordinatesOfCommandCenter, rover), rover.CurrentPosition);
-            return (newCoordinate, GatheringState.Delivery);
+            return (newCoordinate, GatheringState.delivery);
         }
     }
 

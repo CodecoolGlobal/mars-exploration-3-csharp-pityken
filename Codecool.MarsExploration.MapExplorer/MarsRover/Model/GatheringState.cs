@@ -2,7 +2,7 @@
 
 public enum GatheringState
 {
-    Extraction,
-    Delivery,
-    Unload
+    extraction,
+    delivery,
+    unload
 }
