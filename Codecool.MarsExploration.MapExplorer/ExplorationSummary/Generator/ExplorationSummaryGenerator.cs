@@ -24,7 +24,7 @@ namespace Codecool.MarsExploration.MapExplorer.ExplorationSummary.Generator
         {
             List<string> foundResources = new List<string>();
 
-            foreach (KeyValuePair<string, HashSet<Coordinate>> kvp in simulationContext.Rover.ExploredObjects)
+            foreach (KeyValuePair<string, HashSet<Coordinate>> kvp in simulationContext.Rovers[0].ExploredObjects)
             {
                 if(simulationContext.ResourcesToScan.Values.Contains(kvp.Key))
                 foundResources.Add($"{kvp.Key}={kvp.Value.Count}");

@@ -39,6 +39,8 @@ public record SimulationContext
         ResourcesNeededForRover = resourcesNeededForRover;
         MaxRoverInventorySize = maxRoverInventorySize;
         CommandCenterRadius = commandCenterRadius;
+
+        CommandCenters = new List<CommandCenter.Model.CommandCenter>();
     }
 
 }

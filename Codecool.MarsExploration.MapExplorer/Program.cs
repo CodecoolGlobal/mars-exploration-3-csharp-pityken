@@ -70,16 +70,17 @@ class Program
             };
 
             IOutcomeDeterminer outcomeDeterminer = new ColonizationOutcomeDeterminer();
-            ISimulationStep simulationStep = new SimulationStep(simulationContext, outcomeDeterminer, loggers);
+            IBuildableDeterminer buildableDeterminer = new CommandCenterBuildableDeterminer();
+            ISimulationStep simulationStep = new ColonizationSimulationStep(simulationContext, outcomeDeterminer, loggers, buildableDeterminer, assemblyRoutine);
 
-            IExplorationSummaryGenerator explorationSimulationGenerator = new ExplorationSummaryGenerator();
-            IExplorationSummaryRepository explorationSummaryRepository = new ExplorationSummaryRepository(repositoryFile);
-            IExplorationSummaryExporter explorationSummaryExporter = new ExplorationSummaryExporter(explorationSimulationGenerator, explorationSummaryRepository);
-            IFoundResourcesGenerator foundResourcesGenerator = new FoundResourcesGenerator();
-            IFoundResourcesRepository foundResourcesRepository = new FoundResourcesRepository(repositoryFile);
-            IFoundResourcesExporter foundResourcesExporter = new FoundResourcesExporter(foundResourcesGenerator, foundResourcesRepository);
+            //IExplorationSummaryGenerator explorationSimulationGenerator = new ExplorationSummaryGenerator();
+            //IExplorationSummaryRepository explorationSummaryRepository = new ExplorationSummaryRepository(repositoryFile);
+            //IExplorationSummaryExporter explorationSummaryExporter = new ExplorationSummaryExporter(explorationSimulationGenerator, explorationSummaryRepository);
+            //IFoundResourcesGenerator foundResourcesGenerator = new FoundResourcesGenerator();
+            //IFoundResourcesRepository foundResourcesRepository = new FoundResourcesRepository(repositoryFile);
+            //IFoundResourcesExporter foundResourcesExporter = new FoundResourcesExporter(foundResourcesGenerator, foundResourcesRepository);
             
-            IExplorationSimulator explorationSimulator = new ExplorationSimulator(simulationContext, simulationStep, explorationSummaryExporter, foundResourcesExporter);
+            IExplorationSimulator explorationSimulator = new ColonizationSimulator(simulationStep, simulationContext);
 
             
 

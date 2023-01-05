@@ -43,8 +43,8 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service
         private bool RoverBesidesTheSpaceShip()
         {
             return
-                Math.Abs(_simulationContext.Rover.CurrentPosition.X - _simulationContext.SpaceShipLocation.X) <= 1
-                && Math.Abs(_simulationContext.Rover.CurrentPosition.Y - _simulationContext.SpaceShipLocation.Y) <= 1;
+                Math.Abs(_simulationContext.Rovers[0].CurrentPosition.X - _simulationContext.SpaceShipLocation.X) <= 1
+                && Math.Abs(_simulationContext.Rovers[0].CurrentPosition.Y - _simulationContext.SpaceShipLocation.Y) <= 1;
         }
     }
 }

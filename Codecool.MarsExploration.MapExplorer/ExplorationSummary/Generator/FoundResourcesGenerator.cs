@@ -10,7 +10,7 @@ public class FoundResourcesGenerator : IFoundResourcesGenerator
     {
         foreach (var resource in simulationContext.ResourcesToScan)
         {
-            var foundResource = GetFoundResources(simulationContext.Rover.ExploredObjects, resource.Value);
+            var foundResource = GetFoundResources(simulationContext.Rovers[0].ExploredObjects, resource.Value);
             foreach(var coordinate in foundResource)
             {
                 yield return new FoundResource(simulationId, resource.Key, resource.Value, coordinate.X, coordinate.Y);

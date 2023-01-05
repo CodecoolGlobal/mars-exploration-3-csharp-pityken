@@ -23,7 +23,7 @@ public class SuccessAnalyzer : IAnalyzer
 
         bool colonizableAmountOfMineralFound = false;
         bool colonizableAmountOfWaterFound = false;
-        foreach (var exploredResource in simulationContext.Rover.ExploredObjects)
+        foreach (var exploredResource in simulationContext.Rovers[0].ExploredObjects)
         {
             if (exploredResource.Key == simulationContext.ResourcesToScan["mineral"] && exploredResource.Value.Count >= colonizableAmountOfMineral)
                 colonizableAmountOfMineralFound = true;
@@ -41,7 +41,7 @@ public class SuccessAnalyzer : IAnalyzer
         string colonizableResourceB = simulationContext.ResourcesToScan["mineral"];
 
         bool colonizableDistanceOfResourcesFound = false;
-        foreach (var exploredResource in simulationContext.Rover.ExploredObjects)
+        foreach (var exploredResource in simulationContext.Rovers[0].ExploredObjects)
         {
             if (exploredResource.Key == colonizableResourceA && exploredResource.Value.Count >= 1)
             {
@@ -121,13 +121,13 @@ public class SuccessAnalyzer : IAnalyzer
 
     private static List<Coordinate> ListObjectCoordinatesFromRover(string targetResource, SimulationContext simulationContext)
     {
-        HashSet<Coordinate>? returnValue = simulationContext.Rover.ExploredObjects.Where(er => er.Key == targetResource).FirstOrDefault().Value;
+        HashSet<Coordinate>? returnValue = simulationContext.Rovers[0].ExploredObjects.Where(er => er.Key == targetResource).FirstOrDefault().Value;
         return returnValue != null ? returnValue.ToList() : new List<Coordinate>();
     }
 
     private static List<Coordinate> ListAllObjectCoordinatesFromRover(SimulationContext simulationContext)
     {
-        return simulationContext.Rover.ExploredObjects.Values.SelectMany(er => er).ToList();
+        return simulationContext.Rovers[0].ExploredObjects.Values.SelectMany(er => er).ToList();
     }
 
     private static IEnumerable<Coordinate> GetCoordinatesInRange(Coordinate baseCoordinate, int maxDistance, List<Coordinate> targetCoordinates, int mapSize)

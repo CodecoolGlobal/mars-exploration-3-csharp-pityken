@@ -37,7 +37,7 @@ public class SimulationStep : ISimulationStep
 
     private bool Move(bool roverNeedsToReturn)
     {
-        return _simulationContext.Rover.Move(_simulationContext.Map.Dimension, roverNeedsToReturn);
+        return _simulationContext.Rovers[0].Move(_simulationContext.Map.Dimension, roverNeedsToReturn);
     }
 
     private void Scan()
@@ -61,7 +61,7 @@ public class SimulationStep : ISimulationStep
     {
         foreach (ILogger logger in _loggers)
         {
-            logger.Log($"STEP {_simulationContext.CurrentStepNumber}; EVENT position; UNIT {_simulationContext.Rover.Id}; POSITION [{_simulationContext.Rover.CurrentPosition.X}, {_simulationContext.Rover.CurrentPosition.Y}]");
+            logger.Log($"STEP {_simulationContext.CurrentStepNumber}; EVENT position; UNIT {_simulationContext.Rovers[0].Id}; POSITION [{_simulationContext.Rovers[0].CurrentPosition.X}, {_simulationContext.Rovers[0].CurrentPosition.Y}]");
 
             if (currentExplorationOutcome != ExplorationOutcome.None)
                 logger.Log($"STEP {_simulationContext.CurrentStepNumber}; EVENT outcome; OUTCOME {Enum.GetName(currentExplorationOutcome).ToUpper()}");
@@ -82,10 +82,10 @@ public class SimulationStep : ISimulationStep
 
             if (symbolOnCoordinate != " ")
             {
-                if (_simulationContext.Rover.ExploredObjects.ContainsKey(symbolOnCoordinate))
-                    _simulationContext.Rover.ExploredObjects[symbolOnCoordinate].Add(coordinate);
+                if (_simulationContext.Rovers[0].ExploredObjects.ContainsKey(symbolOnCoordinate))
+                    _simulationContext.Rovers[0].ExploredObjects[symbolOnCoordinate].Add(coordinate);
                 else
-                    _simulationContext.Rover.ExploredObjects.Add(symbolOnCoordinate, new HashSet<Coordinate> { coordinate });
+                    _simulationContext.Rovers[0].ExploredObjects.Add(symbolOnCoordinate, new HashSet<Coordinate> { coordinate });
             }
         }
 
@@ -102,12 +102,12 @@ public class SimulationStep : ISimulationStep
     {
         HashSet<Coordinate> coordinatesInSightDistance = new HashSet<Coordinate>();
 
-        HashSet<Coordinate> coordinatesInFirstReach = GetAdjacentCoordinates(_simulationContext.Rover.CurrentPosition, _simulationContext.Map.Dimension).ToHashSet();
+        HashSet<Coordinate> coordinatesInFirstReach = GetAdjacentCoordinates(_simulationContext.Rovers[0].CurrentPosition, _simulationContext.Map.Dimension).ToHashSet();
         coordinatesInSightDistance = coordinatesInSightDistance.Concat(coordinatesInFirstReach).ToHashSet();
 
-        if (_simulationContext.Rover.Sight > 1)
+        if (_simulationContext.Rovers[0].Sight > 1)
         {
-            for (int i = 2; i <= _simulationContext.Rover.Sight; i++)
+            for (int i = 2; i <= _simulationContext.Rovers[0].Sight; i++)
             {
                 foreach (Coordinate coord in coordinatesInSightDistance)
                 {
@@ -116,7 +116,7 @@ public class SimulationStep : ISimulationStep
                 }
             }
         }
-        coordinatesInSightDistance.Remove(_simulationContext.Rover.CurrentPosition);
+        coordinatesInSightDistance.Remove(_simulationContext.Rovers[0].CurrentPosition);
 
         return coordinatesInSightDistance;
     }

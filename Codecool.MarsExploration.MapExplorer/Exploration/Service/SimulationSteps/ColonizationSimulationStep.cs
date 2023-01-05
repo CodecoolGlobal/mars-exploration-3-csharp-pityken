@@ -88,7 +88,28 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private ExplorationOutcome GetExplorationOutcome()
         {
-            throw new NotImplementedException();
+            if (CheckRovesForTimeout())
+            {
+                //log
+                return ExplorationOutcome.Timeout;
+            }
+            else if (CheckForColonizableOutcome(_simulationContext.CommandCentersNeeded))
+            {
+                //log
+                return ExplorationOutcome.Colonizable;
+            }
+
+            return ExplorationOutcome.None;
+        }
+
+        private bool CheckRovesForTimeout()
+        {
+            return _simulationContext.Rovers.Any(r => r.CurrentExplorationStepNumber >= _simulationContext.MaxSteps);
+        }
+
+        private bool CheckForColonizableOutcome(int targetNumberOfCommandCenters)
+        {
+            return targetNumberOfCommandCenters <= _simulationContext.CommandCenters.Count;
         }
 
         private bool CommandCenterAssignedToRover(Rover rover)
