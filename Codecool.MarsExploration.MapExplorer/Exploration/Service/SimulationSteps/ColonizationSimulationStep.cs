@@ -4,6 +4,7 @@ using Codecool.MarsExploration.MapExplorer.CommandCenter.Services.AssemblingRout
 using Codecool.MarsExploration.MapExplorer.Exploration.Model;
 using Codecool.MarsExploration.MapExplorer.Logger;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
+using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -109,7 +110,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private bool CheckForColonizableOutcome(int targetNumberOfCommandCenters)
         {
-            return targetNumberOfCommandCenters <= _simulationContext.CommandCenters.Count;
+            return targetNumberOfCommandCenters <= _simulationContext.CommandCenters.Count; //Does not work, we need the working command center in order to determine it colonizable
         }
 
         private bool CommandCenterAssignedToRover(Rover rover)
@@ -149,6 +150,16 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
         private bool CommandCenterHasNotBuiltYet(CommandCenter.Model.CommandCenter? commandCenter)
         {
             return commandCenter != null && commandCenter.CommandCenterStatus == CommandCenterStatus.UnderConstruction;
+        }
+
+        private void ActionLog(string actionType, string name, string? target = null, string? currentProgress = null, string? maxProgress = null, Coordinate? position = null)
+        {
+
+        }
+
+        private void OutComeLog()
+        {
+
         }
     }
 }
