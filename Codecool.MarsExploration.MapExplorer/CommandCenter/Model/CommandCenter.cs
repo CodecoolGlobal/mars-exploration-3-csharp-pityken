@@ -1,5 +1,4 @@
-﻿using Codecool.MarsExploration.MapExplorer.CommandCenter.Services;
-using Codecool.MarsExploration.MapGenerator.Calculators.Model;
+﻿using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 using Codecool.MarsExploration.MapExplorer.Extensions;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 using Codecool.MarsExploration.MapExplorer.Logger;
@@ -19,9 +18,7 @@ public class CommandCenter
     public Dictionary<string, int> Resources { get; set; }
     public bool ExploringRoverNeeded { get; init; }
     public CommandCenterStatus CommandCenterStatus { get; set; }
-    private readonly ICommandCenterAction _roverBuilderAction;
-    private Rover MarsRover;
-    private IAssemblyRoutine AssemblyRoutine;
+    private readonly IAssemblyRoutine _assemblyRoutine;
 
     public CommandCenter(
         int id, 
@@ -29,27 +26,28 @@ public class CommandCenter
         Coordinate position, 
         int radius, 
         Dictionary<string, HashSet<Coordinate>> discoveredResources, 
-        Dictionary<string, int> resources, 
         List<ResourceNode> resourceNodes, 
         bool exploringRoverNeeded, 
-        IAssemblyRoutine assemblyRoutine,
-        ICommandCenterAction roverBuilderAction)
+        IAssemblyRoutine assemblyRoutine)
     {
         Id = $"base-{id}";
-        MarsRover = builderRover;
         Position = position;
         Radius = radius;
-        Resources = resources; //Resources in Inventory
+        Resources = new Dictionary<string, int>(); //Resources in Inventory
         ResourceNodes = GetResourcesInSight(discoveredResources);
         ExploringRoverNeeded = exploringRoverNeeded;
-        _roverBuilderAction = roverBuilderAction;
         BuildProgress = 0;
-        AssemblyRoutine = assemblyRoutine;
+        _assemblyRoutine = assemblyRoutine;
         AssemblyProgress = 0;
         AdjacentCoordinates = position.GetAdjacentCoordinates(radius).ToList();
         CommandCenterStatus = CommandCenterStatus.UnderConstruction;
-        builderRover.AssignCommandCenter(this);
-        AssignResourceNodeToRover(builderRover);
+        AssignResourceAndCommandCenterToTheRover(builderRover);
+    }
+
+    private void AssignResourceAndCommandCenterToTheRover(Rover rover)
+    {
+        rover.AssignCommandCenter(this);
+        AssignResourceNodeToRover(rover);
     }
 
     public void AddToResources(Dictionary<string, int> resources)
@@ -82,22 +80,19 @@ public class CommandCenter
         if (ResourceNodes.Any(x => !x.HasRoverAssinged) && Minerals >= roverCost )
         {
             CommandCenterStatus = CommandCenterStatus.RoverProduction;
-            //assemble rover
-            return null;
+            return _assemblyRoutine.Assemble(this);
         }
 
         if (IsConstructable(ccCost, Minerals))
         {
             CommandCenterStatus = CommandCenterStatus.UnderConstruction;
-            //idonno what else
             return null;
         }
 
         if (ExploringRoverNeeded && ResourceNodes.Any(x => x.HasRoverAssinged))
         {
             CommandCenterStatus = CommandCenterStatus.RoverProduction;
-            //assemble rover
-            return null; 
+            return _assemblyRoutine.Assemble(this);
         }
 
         CommandCenterStatus = CommandCenterStatus.Idle;
