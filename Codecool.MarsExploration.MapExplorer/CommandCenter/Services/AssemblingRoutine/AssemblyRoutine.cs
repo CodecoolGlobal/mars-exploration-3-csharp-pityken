@@ -4,9 +4,9 @@ using Codecool.MarsExploration.MapExplorer.MarsRover.Service;
 
 namespace Codecool.MarsExploration.MapExplorer.CommandCenter.Services.AssemblingRoutine;
 
-public class AssemblyRoutine
+public class AssemblyRoutine : IAssemblyRoutine
 {
-    private readonly RoverDeployer _roverDeployer;
+    private readonly IRoverDeployer _roverDeployer;
     public Rover? Assemble(Model.CommandCenter commandCenter)
     {
         if (commandCenter.CommandCenterStatus == CommandCenterStatus.RoverProduction)
@@ -28,7 +28,7 @@ public class AssemblyRoutine
         }
     }
 
-    public AssemblyRoutine(RoverDeployer roverDeployer)
+    public AssemblyRoutine(IRoverDeployer roverDeployer)
     {
         _roverDeployer = roverDeployer;
     }
