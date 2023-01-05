@@ -17,7 +17,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service
             while (_simulationContext.ExplorationOutcome == ExplorationOutcome.None)
             {
                 _simulationContext.ExplorationOutcome = _simulationStep.Step();
-            }
+            
         }
     }
 }

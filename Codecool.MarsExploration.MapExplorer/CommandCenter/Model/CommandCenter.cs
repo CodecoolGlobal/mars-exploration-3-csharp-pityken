@@ -1,89 +1,158 @@
-﻿
-private void AddToTotalCollectedResources(KeyValuePair<string, int> resource)
+﻿using Codecool.MarsExploration.MapGenerator.Calculators.Model;
+using Codecool.MarsExploration.MapExplorer.Extensions;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
+using Codecool.MarsExploration.MapExplorer.Logger;
+using Codecool.MarsExploration.MapExplorer.CommandCenter.Services.AssemblingRoutine;
+
+namespace Codecool.MarsExploration.MapExplorer.CommandCenter.Model;
+
+public class CommandCenter
 {
-    if (!TotalCollectedResources.ContainsKey(resource.Key))
+    public string Id { get; }
+    public Coordinate Position { get; init; }
+    public int Radius { get; init; }
+    public List<Coordinate> AdjacentCoordinates { get; init; }
+    public int BuildProgress { get; set; }
+    public int AssemblyProgress { get; set; }
+    public List<ResourceNode> ResourceNodes { get; init; }
+    public Dictionary<string, int> Resources { get; set; }
+    public Dictionary<string, int> TotalCollectedResources { get; set; }
+    public bool ExploringRoverNeeded { get; private set; }
+    public CommandCenterStatus CommandCenterStatus { get; set; }
+    private readonly IAssemblyRoutine _assemblyRoutine;
+
+    public CommandCenter(
+        int id,
+        Rover builderRover,
+        Coordinate position,
+        int radius,
+        Dictionary<string, HashSet<Coordinate>> discoveredResources,
+        //List<ResourceNode> resourceNodes, 
+        bool exploringRoverNeeded,
+        IAssemblyRoutine assemblyRoutine)
     {
-        TotalCollectedResources.Add(resource.Key, resource.Value);
+        Id = $"base-{id}";
+        Position = position;
+        Radius = radius;
+        Resources = new Dictionary<string, int>(); //Resources in Inventory
+        ResourceNodes = GetResourcesInSight(discoveredResources);
+        TotalCollectedResources = new Dictionary<string, int>();
+        ExploringRoverNeeded = exploringRoverNeeded;
+        BuildProgress = 0;
+        _assemblyRoutine = assemblyRoutine;
+        AssemblyProgress = 0;
+        AdjacentCoordinates = position.GetAdjacentCoordinates(radius).ToList();
+        CommandCenterStatus = CommandCenterStatus.UnderConstruction;
+        AssignResourceAndCommandCenterToTheRover(builderRover);
     }
-    else
+
+    public void AssignResourceAndCommandCenterToTheRover(Rover rover)
     {
-        TotalCollectedResources[resource.Key] += resource.Value;
-    }
-}
-
-
-private void AssignResourceNodeToRover(Rover rover) //rover has built => run
-{
-    var mineralResource = ResourceNodes.Count(r => r.HasRoverAssinged == true) == 0
-        ? ResourceNodes.First(x => x.Type == "mineral")
-        : ResourceNodes.First(x => x.HasRoverAssinged == false);
-
-    rover.AssignResourceNode(mineralResource);
-    mineralResource.HasRoverAssinged = true;
-}
-
-public Rover? UpdateStatus(int roverCost)
-{
-    int Minerals = Resources["mineral"];
-
-    if (ResourceNodes.Any(x => !x.HasRoverAssinged) && Minerals >= roverCost)
-    {
-        return AssembleRover(roverCost, false);
+        rover.AssignCommandCenter(this);
+        AssignResourceNodeToRover(rover);
     }
 
-    else if (ExploringRoverNeeded && Minerals >= roverCost)
+    public void AddToResources(Dictionary<string, int> resources)
     {
-        var assemblyStatus = AssembleRover(roverCost, true);
-        if (assemblyStatus != null)
+        foreach (var resource in resources)
         {
-            ExploringRoverNeeded = false;
-        }
-        return assemblyStatus;
-    }
-
-    CommandCenterStatus = CommandCenterStatus.Idle;
-    return null;
-}
-
-
-public bool IsConstructable(int resourceNeeded, int totalResource)
-{
-    return CommandCenterStatus == CommandCenterStatus.UnderConstruction && resourceNeeded <= totalResource;
-}
-
-
-private List<ResourceNode> GetResourcesInSight(Dictionary<string, HashSet<Coordinate>> discoveredResources)
-{
-    List<ResourceNode> resources = new List<ResourceNode>();
-    foreach (var discResource in discoveredResources)
-    {
-        foreach (Coordinate coord in AdjacentCoordinates)
-        {
-            if (discResource.Value.Any(x => x.X == coord.X && x.Y == coord.Y))
+            if (!Resources.ContainsKey(resource.Key))
             {
-                resources.Add(new ResourceNode(discResource.Key, coord, false));
+                Resources.Add(resource.Key, resource.Value);
             }
+            else
+            {
+                Resources[resource.Key] += resource.Value;
+            }
+            AddToTotalCollectedResources(resource);
         }
     }
-    return resources;
-}
 
-private Rover? AssembleRover(int roverCost, bool exploring)
-{
-    CommandCenterStatus = CommandCenterStatus.RoverProduction;
-    var roverAssemblyStatus = _assemblyRoutine.Assemble(this);
-    if (roverAssemblyStatus != null)
+    private void AddToTotalCollectedResources(KeyValuePair<string, int> resource)
     {
-        Resources["mineral"] -= roverCost;
-
-        if (!exploring)
+        if (!TotalCollectedResources.ContainsKey(resource.Key))
         {
-            AssignResourceAndCommandCenterToTheRover(roverAssemblyStatus);
+            TotalCollectedResources.Add(resource.Key, resource.Value);
+        }
+        else
+        {
+            TotalCollectedResources[resource.Key] += resource.Value;
+        }
+    }
+
+
+    public void AssignResourceNodeToRover(Rover rover) //rover has built => run
+    {
+        var mineralResource = ResourceNodes.Count(r => r.HasRoverAssinged == true) == 0
+            ? ResourceNodes.First(x => x.Type == "mineral")
+            : ResourceNodes.First(x => x.HasRoverAssinged == false);
+
+        rover.AssignResourceNode(mineralResource);
+        mineralResource.HasRoverAssinged = true;
+    }
+
+    public Rover? UpdateStatus(int roverCost)
+    {
+        int Minerals = Resources["mineral"];
+
+        if (ResourceNodes.Any(x => !x.HasRoverAssinged) && Minerals >= roverCost)
+        {
+            return AssembleRover(roverCost, false);
+        }
+
+        else if (ExploringRoverNeeded && Minerals >= roverCost)
+        {
+            var assemblyStatus = AssembleRover(roverCost, true);
+            if (assemblyStatus != null)
+            {
+                ExploringRoverNeeded = false;
+            }
+            return assemblyStatus;
         }
 
         CommandCenterStatus = CommandCenterStatus.Idle;
+        return null;
     }
 
-    return roverAssemblyStatus;
-}
+
+    public bool IsConstructable(int resourceNeeded, int totalResource)
+    {
+        return CommandCenterStatus == CommandCenterStatus.UnderConstruction && resourceNeeded <= totalResource;
+    }
+
+
+    private List<ResourceNode> GetResourcesInSight(Dictionary<string, HashSet<Coordinate>> discoveredResources)
+    {
+        List<ResourceNode> resources = new List<ResourceNode>();
+        foreach (var discResource in discoveredResources)
+        {
+            foreach (Coordinate coord in AdjacentCoordinates)
+            {
+                if (discResource.Value.Any(x => x.X == coord.X && x.Y == coord.Y))
+                {
+                    resources.Add(new ResourceNode(discResource.Key, coord, false));
+                }
+            }
+        }
+        return resources;
+    }
+
+    private Rover? AssembleRover(int roverCost, bool exploring)
+    {
+        CommandCenterStatus = CommandCenterStatus.RoverProduction;
+        var roverAssemblyStatus = _assemblyRoutine.Assemble(this);
+        if (roverAssemblyStatus != null)
+        {
+            Resources["mineral"] -= roverCost;
+
+            if (!exploring)
+            {
+                AssignResourceAndCommandCenterToTheRover(roverAssemblyStatus);
+            }
+
+            CommandCenterStatus = CommandCenterStatus.Idle;
+        }
+
+        return roverAssemblyStatus;
+    }
 }

@@ -80,10 +80,11 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                     var roverStatus = c.UpdateStatus(_simulationContext.ResourcesNeededForRover);
                     if (roverStatus != null)
                     {
-                        ActionLog("construction_complete", c.Id, roverStatus.Id);                        
+                        ActionLog("construction_complete", c.Id, roverStatus.Id);
                     }
                     if (c.CommandCenterStatus == CommandCenter.Model.CommandCenterStatus.RoverProduction)
                     {
+                        ActionLog("construction", c.Id, null, (c.AssemblyProgress/10).ToString(), (10).ToString());
                     }
                 }
             });
@@ -93,16 +94,18 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
         {
             if (CheckRovesForTimeout())
             {
-                //log
-                return ExplorationOutcome.Timeout;
+                _simulationContext.ExplorationOutcome = ExplorationOutcome.Timeout;
+                OutComeLog();
             }
             else if (CheckForColonizableOutcome(_simulationContext.CommandCentersNeeded))
             {
-                //log
-                return ExplorationOutcome.Colonizable;
+                _simulationContext.ExplorationOutcome = ExplorationOutcome.Colonizable;
+                OutComeLog();
             }
 
-            return ExplorationOutcome.None;
+            _simulationContext.ExplorationOutcome = ExplorationOutcome.None;
+
+            return _simulationContext.ExplorationOutcome;
         }
 
         private bool CheckRovesForTimeout()
@@ -137,7 +140,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 && HasAllResourcesToBuild(rover.AssignedCommandCenter))
             {
                 rover.BuildCommandCenter();
-                //log
+                ActionLog("construction", rover.Id, rover.AssignedCommandCenter.Id, (rover.AssignedCommandCenter.BuildProgress/10).ToString(), "10");
                 return true;
             }
 
