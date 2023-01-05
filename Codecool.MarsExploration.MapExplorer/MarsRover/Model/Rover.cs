@@ -15,6 +15,7 @@ public record Rover
     public Coordinate CurrentPosition { get; private set; }
     public CommandCenter.Model.CommandCenter? AssignedCommandCenter { get; private set; }
     public Dictionary<string, int> Inventory { get; set; }
+    public Dictionary<string, int> TotalCollectedResources { get; set; }
     public Dictionary<string, HashSet<Coordinate>> ExploredObjects { get; set; }
     public List<Coordinate> PositionHistory { get; }
     public int CurrentExplorationStepNumber { get; private set; }
@@ -48,11 +49,11 @@ public record Rover
         _gatheringRoutine = gatheringRoutine;
         _buildingRoutine = buildingRoutine;
         Inventory = new Dictionary<string, int>();
+        TotalCollectedResources = new Dictionary<string, int>();
         ExploredObjects = new Dictionary<string, HashSet<Coordinate>>();
         PositionHistory = new List<Coordinate>();
 
         SetPosition(deployPosition);
-        //AssemblyProgress = 0;
     }
 
     private void SetPosition(Coordinate coordinate)
@@ -74,16 +75,18 @@ public record Rover
         return false;
     }
 
-    public bool GatherResource(int mapDimension)
+    public GatheringState GatherResource(int mapDimension)
     {
-        Coordinate newCoordinate = _gatheringRoutine.GatherResource(ResourceNode, AssignedCommandCenter, this, mapDimension);
-        bool hasMoved = CheckCoordinateEquality(CurrentPosition, newCoordinate);
+        (Coordinate, GatheringState) newCoordinateAndGatheringStatus = _gatheringRoutine.GatherResource(ResourceNode, AssignedCommandCenter, this, mapDimension);
+        Coordinate newCoordinate = newCoordinateAndGatheringStatus.Item1;
+        GatheringState gatheringState = newCoordinateAndGatheringStatus.Item2;
 
-        if (!hasMoved)
-            return false;
+        //bool hasMoved = CheckCoordinateEquality(CurrentPosition, newCoordinate);
+        //if (!hasMoved)
+        //    return false;
 
         CurrentPosition = newCoordinate;
-        return true;
+        return gatheringState;
     }
 
     public void BuildCommandCenter()
@@ -100,22 +103,12 @@ public record Rover
         CurrentPosition = returnCoordinate;
     }
 
-    //public bool CheckCommandCenterBuildibility(int resourcesNeededForCommandCenter)
-    //{
-    //    if (AssignedCommandCenter is null)
-    //        return false;
-
-    //    return AssignedCommandCenter.CommandCenterStatus == CommandCenterStatus.UnderConstruction && AssignedCommandCenter.Resources.Count >= resourcesNeededForCommandCenter;
-    //}
-
-    //public void Assemble()
-    //{
-    //    AssemblyStatus += 1;
-    //}
-
     public void AddToInventory(ResourceNode resource)
     {
-        Inventory.Add(resource.Type, 1);
+        if (!Inventory.ContainsKey(resource.Type))
+            Inventory.Add(resource.Type, 1);
+        else
+            Inventory[resource.Type]++;
     }
 
     public void RemoveFromInventory(ResourceNode resource)
