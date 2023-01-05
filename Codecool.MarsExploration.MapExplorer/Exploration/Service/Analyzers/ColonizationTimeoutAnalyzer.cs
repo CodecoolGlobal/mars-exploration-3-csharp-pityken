@@ -9,8 +9,9 @@ public class ColonizationTimeoutAnalyzer : IAnalyzer
         bool timeout = false;
         foreach (var rover in simulationContext.Rovers)
         {
-            if (rover.MaxExplorationStepCount >= simulationContext.MaxSteps)
+            if (rover.CurrentExplorationStepNumber >= simulationContext.MaxSteps)
             {
+                
                 timeout = true;
                 break;
             }

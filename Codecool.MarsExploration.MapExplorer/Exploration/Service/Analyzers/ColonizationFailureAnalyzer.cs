@@ -24,18 +24,19 @@ public class ColonizationFailureAnalyzer : IAnalyzer
 
     private static int AllExploredObjectsCounter(SimulationContext simulationContext)
     {
-        Dictionary<string, HashSet<Coordinate>> AllExploredObjects = new();
+        HashSet<Coordinate> AllExploredObjects = new();
         foreach (var rover in simulationContext.Rovers)
         {
-            rover.ExploredObjects.ToList().ForEach(x => AllExploredObjects.Add(x.Key, x.Value));
+            rover.ExploredObjects
+                .ToList()
+                .ForEach(
+                    x => x.Value
+                    .ToList()
+                    .ForEach(c => AllExploredObjects.Add(c))
+            );
         }
 
-        int allExploredObjectsCount = 0;
-        foreach (var exploredObject in AllExploredObjects)
-        {
-            allExploredObjectsCount += exploredObject.Value.Count;
-        }
-        return allExploredObjectsCount;
+        return AllExploredObjects.Count();
     }
 
     private static int MapObjectCounter(SimulationContext simulationContext)

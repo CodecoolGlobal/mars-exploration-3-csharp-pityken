@@ -26,6 +26,7 @@ public class CommandCenter
         Rover builderRover,
         Coordinate position,
         int radius,
+        int mapDimension,
         Dictionary<string, HashSet<Coordinate>> discoveredResources,
         //List<ResourceNode> resourceNodes, 
         bool exploringRoverNeeded,
@@ -35,13 +36,13 @@ public class CommandCenter
         Position = position;
         Radius = radius;
         Resources = new Dictionary<string, int>(); //Resources in Inventory
+        AdjacentCoordinates = position.GetAdjacentCoordinates(mapDimension, radius).ToList();
         ResourceNodes = GetResourcesInSight(discoveredResources);
         TotalCollectedResources = new Dictionary<string, int>();
         ExploringRoverNeeded = exploringRoverNeeded;
         BuildProgress = 0;
         _assemblyRoutine = assemblyRoutine;
         AssemblyProgress = 0;
-        AdjacentCoordinates = position.GetAdjacentCoordinates(radius).ToList();
         CommandCenterStatus = CommandCenterStatus.UnderConstruction;
         AssignResourceAndCommandCenterToTheRover(builderRover);
     }
@@ -84,7 +85,7 @@ public class CommandCenter
     public void AssignResourceNodeToRover(Rover rover) //rover has built => run
     {
         var mineralResource = ResourceNodes.Count(r => r.HasRoverAssinged == true) == 0
-            ? ResourceNodes.First(x => x.Type == "mineral")
+            ? ResourceNodes.First(x => x.Type == "%")
             : ResourceNodes.First(x => x.HasRoverAssinged == false);
 
         rover.AssignResourceNode(mineralResource);
@@ -93,7 +94,7 @@ public class CommandCenter
 
     public Rover? UpdateStatus(int roverCost)
     {
-        int Minerals = Resources["mineral"];
+        int Minerals = Resources["%"];
 
         if (ResourceNodes.Any(x => !x.HasRoverAssinged) && Minerals >= roverCost)
         {
@@ -115,8 +116,10 @@ public class CommandCenter
     }
 
 
-    public bool IsConstructable(int resourceNeeded, int totalResource)
+    public bool IsConstructable(int resourceNeeded)
     {
+        int totalResource = 0;
+        Resources.TryGetValue("%", out totalResource);
         return CommandCenterStatus == CommandCenterStatus.UnderConstruction && resourceNeeded <= totalResource;
     }
 
@@ -143,7 +146,7 @@ public class CommandCenter
         var roverAssemblyStatus = _assemblyRoutine.Assemble(this);
         if (roverAssemblyStatus != null)
         {
-            Resources["mineral"] -= roverCost;
+            Resources["%"] -= roverCost;
 
             if (!exploring)
             {

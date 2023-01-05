@@ -15,7 +15,7 @@ public class RoverDeployer : IRoverDeployer
     private readonly IMovementRoutine _returningRoutine;
     private readonly IGatheringRoutine _gatheringRoutine;
     private readonly IBuildingRoutine _buildingRoutine;
-    private readonly int _id;
+    private int _id;
     private readonly int _sight;
     private readonly int _maxExplorationStepCount;
     private readonly Coordinate _deployPoint;
@@ -36,9 +36,9 @@ public class RoverDeployer : IRoverDeployer
         _maxExplorationStepCount = maxExplorationStepCount;
     }
 
-    public Rover Deploy()
+    public Rover Deploy(Coordinate? location = null)
     {
-        Coordinate[] adjacentCoordinates = _deployPoint.GetAdjacentCoordinates(_map.Dimension).ToArray();
+        Coordinate[] adjacentCoordinates = location == null ? _deployPoint.GetAdjacentCoordinates(_map.Dimension).ToArray() : location.GetAdjacentCoordinates(_map.Dimension).ToArray();
         Coordinate? deployPosition = GetRandomEmptyAdjacentCoordinate(adjacentCoordinates);
 
         //foreach (var item in adjacentCoordinates)
@@ -48,7 +48,7 @@ public class RoverDeployer : IRoverDeployer
         if (deployPosition is null)
             throw new Exception("Rover cannot be placed");
 
-        return new Rover(_exploringRoutine, _returningRoutine, _gatheringRoutine, _id, deployPosition, _sight, _maxExplorationStepCount, _buildingRoutine, _maxRoverInventorySize);
+        return new Rover(_exploringRoutine, _returningRoutine, _gatheringRoutine, _id++, deployPosition, _sight, _maxExplorationStepCount, _buildingRoutine, _maxRoverInventorySize);
     }
 
     private Coordinate? GetRandomEmptyAdjacentCoordinate(Coordinate[] adjacentCoordinates)

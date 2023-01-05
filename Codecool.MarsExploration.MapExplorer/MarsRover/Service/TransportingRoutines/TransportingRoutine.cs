@@ -28,11 +28,11 @@ namespace Codecool.MarsExploration.MapExplorer.MarsRover.Service.TransportingRou
             var pathfinder = new PathFinder(worldGrid, pathfinderOptions);
 
             var path = pathfinder.FindPath(new Point(roverCoordinate.X, roverCoordinate.Y), new Point(coordinate.X, coordinate.Y));
-            if (path is null)
+            if (path.Length == 0)
             {
                 return roverCoordinate;
             }
-            return new Coordinate(path.First().X, path.First().Y);
+            return new Coordinate(path.Skip(1).First().X, path.Skip(1).First().Y);
         }
 
         private short[,] ConvertMap(Map map)
@@ -45,7 +45,7 @@ namespace Codecool.MarsExploration.MapExplorer.MarsRover.Service.TransportingRou
             {
                 for (int j = 0; j < horizontal; j++)
                 {
-                    if (map.Representation[i, j] == "")
+                    if (map.Representation[i, j] == " ")
                     {
                         temp[i, j] = 1;
                     }

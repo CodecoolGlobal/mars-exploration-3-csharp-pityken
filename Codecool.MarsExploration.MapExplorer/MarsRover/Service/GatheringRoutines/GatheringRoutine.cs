@@ -26,8 +26,13 @@ public class GatheringRoutine : IGatheringRoutine
 
         if (adjacentCoordinatesOfResource.Contains(rover.CurrentPosition) && !hasCollectedResource)
         {
-            while (rover.Inventory.Count < rover.InventorySize)
+            int inventoryCount = 0;
+            while (inventoryCount <= rover.InventorySize)
             {
+                foreach (KeyValuePair<string, int> inventoryElement in rover.Inventory)
+                {
+                    inventoryCount += inventoryElement.Value;
+                }
                 rover.AddToInventory(resourceNode);
 
                 if (!rover.TotalCollectedResources.ContainsKey(resourceNode.Type))
@@ -53,13 +58,25 @@ public class GatheringRoutine : IGatheringRoutine
 
         if (!hasCollectedResource)
         {
-            Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(resourceNode.Coordinate, rover.CurrentPosition);
+            Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(GetEmptyAdjecentCoordinate(adjacentCoordinatesOfResource, rover), rover.CurrentPosition);
             return (newCoordinate, GatheringState.Delivery);
         }
         else
         {
-            Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(commandCenter.Position, rover.CurrentPosition);
+            Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(GetEmptyAdjecentCoordinate(adjacentCoordinatesOfCommandCenter, rover), rover.CurrentPosition);
             return (newCoordinate, GatheringState.Delivery);
         }
+    }
+
+    private Coordinate GetEmptyAdjecentCoordinate(IEnumerable<Coordinate> coordinates, Rover rover)
+    {
+        
+        Dictionary<string, HashSet<Coordinate>> exploredObjects = rover.ExploredObjects;
+        List<Coordinate> coordinatesWithObjects = new List<Coordinate>();
+        foreach (KeyValuePair<string, HashSet<Coordinate>> kvp in exploredObjects) 
+        {
+            coordinatesWithObjects.AddRange(kvp.Value.ToList());
+        }
+        return coordinates.Where(c => !coordinatesWithObjects.Contains(c)).First();
     }
 }

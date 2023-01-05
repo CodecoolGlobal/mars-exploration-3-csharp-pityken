@@ -19,7 +19,7 @@ public class AssemblyRoutine : IAssemblyRoutine
             else
             {
                 commandCenter.AssemblyProgress = 0;
-                return _roverDeployer.Deploy(); // create and return a new rover object
+                return _roverDeployer.Deploy(commandCenter.Position); // create and return a new rover object
             }
         }
         else

@@ -2,6 +2,7 @@
 using Codecool.MarsExploration.MapExplorer.CommandCenter.Services;
 using Codecool.MarsExploration.MapExplorer.CommandCenter.Services.AssemblingRoutine;
 using Codecool.MarsExploration.MapExplorer.Exploration.Model;
+using Codecool.MarsExploration.MapExplorer.Extensions;
 using Codecool.MarsExploration.MapExplorer.Logger;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
@@ -13,7 +14,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
         private readonly SimulationContext _simulationContext;
         private readonly IOutcomeDeterminer _outcomeDeterminer;
         private readonly IBuildableDeterminer _commandCenterBuildableDeterminer;
-        private readonly IAssemblyRoutine _asseblyRoutine;
+        private readonly IAssemblyRoutine _assemblyRoutine;
         private readonly IEnumerable<ILogger> _loggers;
         private readonly ICommandCenterDeployer commandCenterDeployer;
 
@@ -23,8 +24,8 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             _outcomeDeterminer = outcomeDeterminer;
             _commandCenterBuildableDeterminer = commandCenterBuildableDeterminer;
             _loggers = loggers;
-            _asseblyRoutine = asseblyRoutine;
-            commandCenterDeployer = new CommandCenterDeployer(_simulationContext.CommandCenterRadius, _asseblyRoutine);
+            _assemblyRoutine = asseblyRoutine;
+            commandCenterDeployer = new CommandCenterDeployer(_simulationContext.CommandCenterRadius, _assemblyRoutine, (Dictionary<string, string>)_simulationContext.ResourcesToScan, _simulationContext.Map.Dimension);
         }
         public ExplorationOutcome Step()
         {
@@ -44,13 +45,14 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                     if (_commandCenterBuildableDeterminer.Determine(_simulationContext, r.Id))
                     {
                         var commandcenter = commandCenterDeployer.Deploy(r);
-                        commandcenter.AssignResourceAndCommandCenterToTheRover(r);
+                        _simulationContext.CommandCenters.Add(commandcenter);
                         r.MoveBack();
                         ActionLog("deployment", r.Id, commandcenter.Id, null, null, commandcenter.Position);
                     }
                     else
                     {
                         r.Move(_simulationContext.Map.Dimension);
+                        Scan(r);
                         PositionLog(r.CurrentPosition, r.Id);
                     }
                 }
@@ -58,6 +60,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 {
                     if (!BuildCommandCenterIfNeeded(r))
                     {
+                        Scan(r);
                         var gatherstate = r.GatherResource(_simulationContext.Map.Dimension);
 
                         ActionLog(gatherstate.ToString(), r.Id, null, null, null, r.CurrentPosition);
@@ -80,6 +83,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                     var roverStatus = c.UpdateStatus(_simulationContext.ResourcesNeededForRover);
                     if (roverStatus != null)
                     {
+                        _simulationContext.Rovers.Add(roverStatus);
                         ActionLog("construction_complete", c.Id, roverStatus.Id);
                     }
                     if (c.CommandCenterStatus == CommandCenter.Model.CommandCenterStatus.RoverProduction)
@@ -92,30 +96,13 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private ExplorationOutcome GetExplorationOutcome()
         {
-            if (CheckRovesForTimeout())
+            _simulationContext.ExplorationOutcome = _outcomeDeterminer.Determine(_simulationContext);
+            if (_simulationContext.ExplorationOutcome != ExplorationOutcome.None)
             {
-                _simulationContext.ExplorationOutcome = ExplorationOutcome.Timeout;
                 OutComeLog();
             }
-            else if (CheckForColonizableOutcome(_simulationContext.CommandCentersNeeded))
-            {
-                _simulationContext.ExplorationOutcome = ExplorationOutcome.Colonizable;
-                OutComeLog();
-            }
-
-            _simulationContext.ExplorationOutcome = ExplorationOutcome.None;
 
             return _simulationContext.ExplorationOutcome;
-        }
-
-        private bool CheckRovesForTimeout()
-        {
-            return _simulationContext.Rovers.Any(r => r.CurrentExplorationStepNumber >= _simulationContext.MaxSteps);
-        }
-
-        private bool CheckForColonizableOutcome(int targetNumberOfCommandCenters)
-        {
-            return targetNumberOfCommandCenters <= _simulationContext.CommandCenters.Count; //Does not work, we need the working command center in order to determine it colonizable
         }
 
         private bool CommandCenterAssignedToRover(Rover rover)
@@ -130,7 +117,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private bool CommandCenterBesidesTheRover(Rover rover)
         {
-            return rover.AssignedCommandCenter != null && rover.AssignedCommandCenter.AdjacentCoordinates.Contains(rover.CurrentPosition);
+            return rover.AssignedCommandCenter != null && rover.AssignedCommandCenter.Position.GetAdjacentCoordinates(_simulationContext.Map.Dimension).Contains(rover.CurrentPosition);
         }
 
         private bool BuildCommandCenterIfNeeded(Rover rover)
@@ -149,7 +136,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
 
         private bool HasAllResourcesToBuild(CommandCenter.Model.CommandCenter commandCenter)
         {
-            return commandCenter.IsConstructable(_simulationContext.ResourcesNeededForCommandCenter, commandCenter.Resources["mineral"]);
+            return commandCenter.IsConstructable(_simulationContext.ResourcesNeededForCommandCenter);
         }
 
         private bool CommandCenterHasNotBuiltYet(CommandCenter.Model.CommandCenter? commandCenter)
@@ -161,7 +148,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
         {
             foreach (var log in _loggers)
             {
-                log.ActionLog(_simulationContext.CurrentStepNumber, actionType, name, target, currentProgress, maxProgress);
+                log.ActionLog(_simulationContext.CurrentStepNumber, actionType, name, target, currentProgress, maxProgress, position);
             }
         }
 
@@ -179,6 +166,54 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             {
                 log.PositionLog(_simulationContext.CurrentStepNumber, position, name);
             }
+        }
+
+        private void Scan(Rover rover)
+        {
+            HashSet<Coordinate> coordinatesInSightDistance = GetAllCoordinatesInCurrentSightDistance(rover);
+
+            //foreach (var item in coordinatesInSightDistance)
+            //    Console.WriteLine(item);
+            //Console.WriteLine(coordinatesInSightDistance.Count);
+
+            ScanAllCoordinatesInSightDistance(coordinatesInSightDistance, rover);
+            return;
+        }
+
+        private HashSet<Coordinate> GetAllCoordinatesInCurrentSightDistance(Rover rover)
+        {
+            HashSet<Coordinate> coordinatesInSightDistance = new HashSet<Coordinate>();
+
+            HashSet<Coordinate> coordinatesInFirstReach = rover.CurrentPosition.GetAdjacentCoordinates(_simulationContext.Map.Dimension, rover.Sight).ToHashSet(); //GetAdjacentCoordinates(rover.CurrentPosition, _simulationContext.Map.Dimension).ToHashSet();
+            coordinatesInSightDistance = coordinatesInSightDistance.Concat(coordinatesInFirstReach).ToHashSet();
+
+            //coordinatesInSightDistance.Remove(rover.CurrentPosition);
+
+            return coordinatesInSightDistance;
+        }
+
+        private void ScanAllCoordinatesInSightDistance(HashSet<Coordinate> coordinatesInSightDistance, Rover rover)
+        {
+            foreach (Coordinate coordinate in coordinatesInSightDistance)
+            {
+                string symbolOnCoordinate = _simulationContext.Map.Representation[coordinate.X, coordinate.Y];
+
+                if (symbolOnCoordinate != " ")
+                {
+                    if (rover.ExploredObjects.ContainsKey(symbolOnCoordinate))
+                        rover.ExploredObjects[symbolOnCoordinate].Add(coordinate);
+                    else
+                        rover.ExploredObjects.Add(symbolOnCoordinate, new HashSet<Coordinate> { coordinate });
+                }
+            }
+
+            //Console.WriteLine("Current rover position: " + _simulationContext.Rover.CurrentPosition);
+            //foreach (var kvp in _simulationContext.Rover.ExploredResources)
+            //{
+            //    Console.WriteLine(kvp.Key);
+            //    foreach (var c in kvp.Value)
+            //        Console.WriteLine(c);
+            //}
         }
     }
 }

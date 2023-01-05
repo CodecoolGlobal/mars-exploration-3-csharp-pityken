@@ -17,8 +17,8 @@ public class CommandCenterBuildableDeterminer : IBuildableDeterminer
 
     private bool EnoughResourcesInSight(SimulationContext simulationContext, List<Coordinate> visibleCoordinates)
     {
-        int colonizableAmountOfMineral = 4;
-        int colonizableAmountOfWater = 3;
+        int colonizableAmountOfMineral = 1;
+        int colonizableAmountOfWater = 1;
 
         int amountOfMineralFound = 0;
         int amountOfWaterFound = 0;
