@@ -26,7 +26,7 @@ public class CommandCenter
         Coordinate position, 
         int radius, 
         Dictionary<string, HashSet<Coordinate>> discoveredResources, 
-        List<ResourceNode> resourceNodes, 
+        //List<ResourceNode> resourceNodes, 
         bool exploringRoverNeeded, 
         IAssemblyRoutine assemblyRoutine)
     {
