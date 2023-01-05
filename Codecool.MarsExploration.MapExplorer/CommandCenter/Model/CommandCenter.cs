@@ -50,11 +50,6 @@ public class CommandCenter
         AssignResourceNodeToRover(rover);
     }
 
-    public void UpdateStatus() 
-    {
-    
-    }
-
     public void AddToResources(Dictionary<string, int> resources)
     {
         foreach (var resource in resources)

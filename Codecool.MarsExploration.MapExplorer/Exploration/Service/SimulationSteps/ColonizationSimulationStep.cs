@@ -46,20 +46,21 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                         var commandcenter = commandCenterDeployer.Deploy(r);
                         commandcenter.AssignResourceAndCommandCenterToTheRover(r);
                         r.MoveBack();
-                        //log
+                        ActionLog("deployment", r.Id, commandcenter.Id, null, null, commandcenter.Position);
                     }
                     else
                     {
                         r.Move(_simulationContext.Map.Dimension);
-                        //log
+                        PositionLog(r.CurrentPosition, r.Id);
                     }
                 }
                 else if (CommandCenterAssignedToRover(r) && ResourceNodeAssignedToRover(r))
                 {
                     if (!BuildCommandCenterIfNeeded(r))
                     {
-                        r.GatherResource(_simulationContext.Map.Dimension);
-                        //log
+                        var gatherstate = r.GatherResource(_simulationContext.Map.Dimension);
+
+                        ActionLog(gatherstate.ToString(), r.Id, null, null, null, r.CurrentPosition);
                     }
 
                 }
@@ -76,8 +77,14 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             {
                 if (c.CommandCenterStatus != CommandCenter.Model.CommandCenterStatus.UnderConstruction)
                 {
-                    c.UpdateStatus();
-                    //log
+                    var roverStatus = c.UpdateStatus(_simulationContext.ResourcesNeededForRover);
+                    if (roverStatus != null)
+                    {
+                        ActionLog("construction_complete", c.Id, roverStatus.Id);                        
+                    }
+                    if (c.CommandCenterStatus == CommandCenter.Model.CommandCenterStatus.RoverProduction)
+                    {
+                    }
                 }
             });
         }
@@ -160,6 +167,14 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             foreach (var log in _loggers)
             {
                 log.OutcomeLog(_simulationContext.CurrentStepNumber, _simulationContext.ExplorationOutcome);
+            }
+        }
+
+        private void PositionLog(Coordinate position, string name)
+        {
+            foreach (var log in _loggers)
+            {
+                log.PositionLog(_simulationContext.CurrentStepNumber, position, name);
             }
         }
     }
