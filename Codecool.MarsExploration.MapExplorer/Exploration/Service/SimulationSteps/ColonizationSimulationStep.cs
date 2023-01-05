@@ -41,7 +41,6 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 {
                     if (_commandCenterBuildableDeterminer.Determine(_simulationContext, r.Id))
                     {
-
                         //log
                     }
                     else
@@ -52,8 +51,10 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 }
                 else if (CommandCenterAssignedToRover(r) && ResourceNodeAssignedToRover(r))
                 {
+                    BuildCommandCenterIfNeeded(r);
+
                     r.GatherResource(_simulationContext.Map.Dimension);
-                    CheckCommandCenterBuildRequirements(r);
+                    BuildCommandCenterIfNeeded(r);
                     //log
                 }
                 else
@@ -95,22 +96,25 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             return rover.AssignedCommandCenter != null ? rover.AssignedCommandCenter.AdjacentCoordinates.Contains(rover.CurrentPosition) : false;
         }
 
-        private void CheckCommandCenterBuildRequirements(Rover rover)
+        private void BuildCommandCenterIfNeeded(Rover rover)
         {
-            if (CommandCenterBesidesTheRover(rover) && CommandCenterHasNotBuiltYet(rover.AssignedCommandCenter) && HasAllResourcesToBuild(rover.AssignedCommandCenter))
+            if (CommandCenterBesidesTheRover(rover)
+                && CommandCenterHasNotBuiltYet(rover.AssignedCommandCenter) 
+                && HasAllResourcesToBuild(rover.AssignedCommandCenter))
             {
-
+                rover.BuildCommandCenter();
+                //log
             }
         }
 
-        private bool HasAllResourcesToBuild(CommandCenter.Model.CommandCenter? commandCenter)
+        private bool HasAllResourcesToBuild(CommandCenter.Model.CommandCenter commandCenter)
         {
-            return true; // commandCenter != null && commandCenter.Resources.ContainsKey();
+            return commandCenter.IsConstructable(_simulationContext.ResourcesNeededForCommandCenter, commandCenter.Resources["mineral"]);
         }
 
         private bool CommandCenterHasNotBuiltYet(CommandCenter.Model.CommandCenter? commandCenter)
         {
-            return commandCenter == null || commandCenter.CommandCenterStatus == CommandCenterStatus.UnderConstruction;
+            return commandCenter != null && commandCenter.CommandCenterStatus == CommandCenterStatus.UnderConstruction;
         }
     }
 }
