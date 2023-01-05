@@ -29,6 +29,11 @@ public class GatheringRoutine : IGatheringRoutine
             while (rover.Inventory.Count < rover.InventorySize)
             {
                 rover.AddToInventory(resourceNode);
+
+                if (!rover.TotalCollectedResources.ContainsKey(resourceNode.Type))
+                   rover.TotalCollectedResources.Add(resourceNode.Type, 1);
+                else
+                    rover.TotalCollectedResources[resourceNode.Type]++;
             }
 
             return rover.CurrentPosition;
