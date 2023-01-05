@@ -64,9 +64,23 @@ public class CommandCenter
             {
                 Resources[resource.Key] += resource.Value;
             }
+            AddToTotalCollectedResources(resource);
         }
     }
-    
+
+    private void AddToTotalCollectedResources(KeyValuePair<string, int> resource)
+    {
+        if (!TotalCollectedResources.ContainsKey(resource.Key))
+        {
+            TotalCollectedResources.Add(resource.Key, resource.Value);
+        }
+        else
+        {
+            TotalCollectedResources[resource.Key] += resource.Value;
+        }
+    }
+
+
     public void AssignResourceNodeToRover(Rover rover) //rover has built => run
     {
         var mineralResource = ResourceNodes.Count(r => r.HasRoverAssinged == true) == 0 
