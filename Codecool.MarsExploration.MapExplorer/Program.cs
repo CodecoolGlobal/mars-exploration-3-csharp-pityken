@@ -14,6 +14,8 @@ using Codecool.MarsExploration.MapGenerator.MapElements.Model;
 using Codecool.MarsExploration.MapExplorer.Configuration.Service;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutines;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.TransportingRoutines;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Service.BuildingRoutine;
+using Codecool.MarsExploration.MapExplorer.CommandCenter.Services.AssemblingRoutine;
 
 namespace Codecool.MarsExploration.MapExplorer;
 
@@ -48,11 +50,13 @@ class Program
             IMovementRoutine exploringRoutine = new RandomExploringRoutine();
             IMovementRoutine returningRoutine = new BasicReturningRoutine();
             ITransportingRoutine transportingRoutine = new TransportingRoutine(map);
-            IGatheringRoutine gatheringRoutine = new GatheringRoutine(transportingRoutine); 
+            IGatheringRoutine gatheringRoutine = new GatheringRoutine(transportingRoutine);
+            IBuildingRoutine buildingRoutine = new BuildingRoutine();
 
             int id = 1;
             int sight = 5;
-            IRoverDeployer roverDeployer = new RoverDeployer(exploringRoutine, returningRoutine, id, sight, configuration.LandingSpot, map, gatheringRoutine, maxRoverInventorySize);
+            IRoverDeployer roverDeployer = new RoverDeployer(exploringRoutine, returningRoutine, id, sight, configuration.LandingSpot, map, gatheringRoutine, buildingRoutine, maxRoverInventorySize, configuration.MaxSteps);
+            IAssemblyRoutine assemblyRoutine = new AssemblyRoutine(roverDeployer);
             Rover MarsRover = roverDeployer.Deploy();
 
             SimulationContext simulationContext = new SimulationContext(configuration.MaxSteps, MarsRover, configuration.LandingSpot, map, configuration.ResourcesToScan, logFilePath, commandCentersNeeded, resourcesNeededForCommandCenter, resourcesNeededForRover, maxRoverInventorySize);

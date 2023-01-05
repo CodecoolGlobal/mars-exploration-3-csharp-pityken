@@ -10,6 +10,8 @@ public class CommandCenter
     public Coordinate Position { get; init; }
     public int Radius { get; init; }
     public List<Coordinate> AdjacentCoordinates { get; init; }
+    public int BuildProgress { get; set; }
+    public int AssemblyProgress { get; set; }
     public List<ResourceNode> ResourceNodes { get; init; }
     public Dictionary<string, int> Resources { get; set; }
     public bool ExploringRoverNeeded { get; init; }
@@ -27,6 +29,8 @@ public class CommandCenter
         ExploringRoverNeeded = exploringRoverNeeded;
         CommandCenterStatus = CommandCenterStatus.UnderConstruction;
         _roverBuilderAction = roverBuilderAction;
+        BuildProgress = 0;
+        AssemblyProgress = 0;
     }
 
     public void AddToResources(Dictionary<string, int> resources)
