@@ -6,7 +6,7 @@ namespace Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutin
 
 public interface IGatheringRoutine
 {
-    Coordinate GatherResource(
+    (Coordinate, GatheringState) GatherResource(
         ResourceNode resourceNode,
         CommandCenter.Model.CommandCenter commandCenter,
         Rover rover,

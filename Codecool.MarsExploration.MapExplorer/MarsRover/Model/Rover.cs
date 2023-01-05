@@ -75,16 +75,18 @@ public record Rover
         return false;
     }
 
-    public bool GatherResource(int mapDimension)
+    public GatheringState GatherResource(int mapDimension)
     {
-        Coordinate newCoordinate = _gatheringRoutine.GatherResource(ResourceNode, AssignedCommandCenter, this, mapDimension);
-        bool hasMoved = CheckCoordinateEquality(CurrentPosition, newCoordinate);
+        (Coordinate, GatheringState) newCoordinateAndGatheringStatus = _gatheringRoutine.GatherResource(ResourceNode, AssignedCommandCenter, this, mapDimension);
+        Coordinate newCoordinate = newCoordinateAndGatheringStatus.Item1;
+        GatheringState gatheringState = newCoordinateAndGatheringStatus.Item2;
 
-        if (!hasMoved)
-            return false;
+        //bool hasMoved = CheckCoordinateEquality(CurrentPosition, newCoordinate);
+        //if (!hasMoved)
+        //    return false;
 
         CurrentPosition = newCoordinate;
-        return true;
+        return gatheringState;
     }
 
     public void BuildCommandCenter()

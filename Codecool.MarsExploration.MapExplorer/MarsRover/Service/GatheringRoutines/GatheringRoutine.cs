@@ -17,7 +17,7 @@ public class GatheringRoutine : IGatheringRoutine
     }
 
 
-    public Coordinate GatherResource(ResourceNode resourceNode, CommandCenter.Model.CommandCenter commandCenter, Rover rover, int  mapDimension)
+    public (Coordinate, GatheringState) GatherResource(ResourceNode resourceNode, CommandCenter.Model.CommandCenter commandCenter, Rover rover, int  mapDimension)
     {
 
         bool hasCollectedResource = rover.Inventory.Any();
@@ -36,7 +36,7 @@ public class GatheringRoutine : IGatheringRoutine
                     rover.TotalCollectedResources[resourceNode.Type]++;
             }
 
-            return rover.CurrentPosition;
+            return (rover.CurrentPosition, GatheringState.Extraction);
         }
 
         if (adjacentCoordinatesOfCommandCenter.Contains(rover.CurrentPosition) && hasCollectedResource)
@@ -48,18 +48,18 @@ public class GatheringRoutine : IGatheringRoutine
                 rover.RemoveFromInventory(resourceNode);
             }
            
-            return rover.CurrentPosition;
+            return (rover.CurrentPosition, GatheringState.Unload);
         }
 
         if (!hasCollectedResource)
         {
             Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(resourceNode.Coordinate, rover.CurrentPosition);
-            return newCoordinate;
+            return (newCoordinate, GatheringState.Delivery);
         }
         else
         {
             Coordinate newCoordinate = _transportingRoutine.MoveToCoordinate(commandCenter.Position, rover.CurrentPosition);
-            return newCoordinate;
+            return (newCoordinate, GatheringState.Delivery);
         }
     }
 }
