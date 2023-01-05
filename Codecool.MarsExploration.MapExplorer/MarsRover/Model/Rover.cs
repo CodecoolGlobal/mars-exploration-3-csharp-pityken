@@ -1,4 +1,5 @@
 ﻿using Codecool.MarsExploration.MapExplorer.CommandCenter.Model;
+using Codecool.MarsExploration.MapExplorer.Extensions;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.BuildingRoutine;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.GatheringRoutines;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Service.MovementRoutines;
@@ -20,6 +21,7 @@ public record Rover
     public List<Coordinate> PositionHistory { get; }
     public int CurrentExplorationStepNumber { get; private set; }
     public ResourceNode? ResourceNode { get; private set; }
+    public int StuckCounter { get; private set; }
     //public int AssemblyProgress { get; private set;  }
 
     private readonly IMovementRoutine _exploringRoutine;
@@ -27,7 +29,7 @@ public record Rover
     private readonly IGatheringRoutine _gatheringRoutine;
     private readonly IBuildingRoutine _buildingRoutine;
     private readonly int _maxInventorySize;
-
+    private readonly Random _random;
 
     public Rover(IMovementRoutine exploringRoutine,
         IMovementRoutine returningRoutine,
@@ -52,8 +54,11 @@ public record Rover
         TotalCollectedResources = new Dictionary<string, int>();
         ExploredObjects = new Dictionary<string, HashSet<Coordinate>>();
         PositionHistory = new List<Coordinate>();
+        _random = new Random();
+        StuckCounter = 0;
 
         SetPosition(deployPosition);
+
     }
 
     private void SetPosition(Coordinate coordinate)
@@ -85,7 +90,7 @@ public record Rover
         //if (!hasMoved)
         //    return false;
 
-        CurrentPosition = newCoordinate;
+        SetPosition(GetEscapeCoordinateIfRoverStuck(newCoordinate, mapDimension));
         return gatheringState;
     }
 
@@ -129,5 +134,43 @@ public record Rover
     private bool CheckCoordinateEquality(Coordinate coordinateOne, Coordinate coordinateTwo)
     {
         return coordinateOne.X == coordinateTwo.X && coordinateOne.Y == coordinateTwo.Y;
+    }
+
+    private Coordinate GetEscapeCoordinateIfRoverStuck(Coordinate coordinate, int mapDimension)
+    {
+        int positionHistoryCount = PositionHistory.Count;
+        int historyEntryCounter = 0;
+        HashSet<Coordinate> differentCoordinates = new HashSet<Coordinate>();
+        for (int i = positionHistoryCount - 1; i > positionHistoryCount - 11; i--)
+        {
+            if (i > 0)
+            {
+                differentCoordinates.Add(PositionHistory[i]);
+                historyEntryCounter++;
+            }
+        }
+
+
+        if (differentCoordinates.Count < 2 && historyEntryCounter >= 10)
+        {
+            IEnumerable<Coordinate> adjecentCoordinates = coordinate.GetAdjacentCoordinates(mapDimension, 2).ToHashSet();
+            HashSet<Coordinate> objectCoordinates = new HashSet<Coordinate>();
+            ExploredObjects
+                    .ToList()
+                    .ForEach(
+                        x => x.Value
+                    .ToList()
+                    .ForEach(c => objectCoordinates.Add(c))
+                  );
+            Coordinate[] emptyCoordinates = adjecentCoordinates.Except(objectCoordinates).ToArray();
+            StuckCounter++;
+
+            return emptyCoordinates[_random.Next(0, emptyCoordinates.Length)];
+        }
+        else if (differentCoordinates.Count > 9)
+        {
+            StuckCounter = 0;
+        }
+        return coordinate;
     }
 }

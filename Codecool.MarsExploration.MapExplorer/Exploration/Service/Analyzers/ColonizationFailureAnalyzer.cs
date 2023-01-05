@@ -1,4 +1,5 @@
 ﻿using Codecool.MarsExploration.MapExplorer.Exploration.Model;
+using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
 using Codecool.MarsExploration.MapGenerator.Calculators.Model;
 
 namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.Analyzers;
@@ -11,7 +12,16 @@ public class ColonizationFailureAnalyzer : IAnalyzer
         {
             return ExplorationOutcome.NotColonizable;
         }
+        else if (RoverStuckCounterError(simulationContext.Rovers))
+        {
+            return ExplorationOutcome.Error;
+        }
         return ExplorationOutcome.None;
+    }
+
+    private static bool RoverStuckCounterError(List<Rover> rovers)
+    {
+        return rovers.Any(r => r.StuckCounter > 10);
     }
 
     private static bool MapCoverageComplete(SimulationContext simulationContext)

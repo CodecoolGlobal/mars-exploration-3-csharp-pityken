@@ -21,17 +21,17 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service
             ExplorationOutcome TimeoutAnalyzerResult = _timeoutAnalyzer.Analyze(simulationContext);
             ExplorationOutcome FailureAnalyzerResult = _failureAnalyzer.Analyze(simulationContext);
 
-            if (SuccessAnalyzerResult == ExplorationOutcome.Colonizable)
+            if (SuccessAnalyzerResult != ExplorationOutcome.None)
             {
                 return SuccessAnalyzerResult;
             }
 
-            if (FailureAnalyzerResult == ExplorationOutcome.NotColonizable)
+            if (FailureAnalyzerResult != ExplorationOutcome.None)
             {
-                return TimeoutAnalyzerResult;
+                return FailureAnalyzerResult;
             }
 
-            if (TimeoutAnalyzerResult == ExplorationOutcome.Timeout)
+            if (TimeoutAnalyzerResult != ExplorationOutcome.None)
             {
                 return TimeoutAnalyzerResult;
             }
