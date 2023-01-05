@@ -1,4 +1,6 @@
 ﻿using Codecool.MarsExploration.MapExplorer.CommandCenter.Model;
+using Codecool.MarsExploration.MapExplorer.CommandCenter.Services;
+using Codecool.MarsExploration.MapExplorer.CommandCenter.Services.AssemblingRoutine;
 using Codecool.MarsExploration.MapExplorer.Exploration.Model;
 using Codecool.MarsExploration.MapExplorer.Logger;
 using Codecool.MarsExploration.MapExplorer.MarsRover.Model;
@@ -15,14 +17,18 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
         private readonly SimulationContext _simulationContext;
         private readonly IOutcomeDeterminer _outcomeDeterminer;
         private readonly IBuildableDeterminer _commandCenterBuildableDeterminer;
+        private readonly IAssemblyRoutine _asseblyRoutine;
         private readonly IEnumerable<ILogger> _loggers;
+        private readonly ICommandCenterDeployer commandCenterDeployer;
 
-        public ColonizationSimulationStep(SimulationContext simulationContext, IOutcomeDeterminer outcomeDeterminer, IEnumerable<ILogger> loggers, IBuildableDeterminer commandCenterBuildableDeterminer)
+        public ColonizationSimulationStep(SimulationContext simulationContext, IOutcomeDeterminer outcomeDeterminer, IEnumerable<ILogger> loggers, IBuildableDeterminer commandCenterBuildableDeterminer, IAssemblyRoutine asseblyRoutine)
         {
             _simulationContext = simulationContext;
             _outcomeDeterminer = outcomeDeterminer;
             _commandCenterBuildableDeterminer = commandCenterBuildableDeterminer;
             _loggers = loggers;
+            _asseblyRoutine = asseblyRoutine;
+            commandCenterDeployer = new CommandCenterDeployer(_simulationContext.CommandCenterRadius, _asseblyRoutine);
         }
         public ExplorationOutcome Step()
         {
@@ -41,6 +47,9 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 {
                     if (_commandCenterBuildableDeterminer.Determine(_simulationContext, r.Id))
                     {
+                        CommandCenter.Model.CommandCenter commandcenter = commandCenterDeployer.Deploy(r);
+                        commandcenter.AssignResourceAndCommandCenterToTheRover(r);
+                        r.MoveBack();
                         //log
                     }
                     else
@@ -51,11 +60,12 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
                 }
                 else if (CommandCenterAssignedToRover(r) && ResourceNodeAssignedToRover(r))
                 {
-                    BuildCommandCenterIfNeeded(r);
+                    if (!BuildCommandCenterIfNeeded(r))
+                    {
+                        r.GatherResource(_simulationContext.Map.Dimension);
+                        //log
+                    }
 
-                    r.GatherResource(_simulationContext.Map.Dimension);
-                    BuildCommandCenterIfNeeded(r);
-                    //log
                 }
                 else
                 {
@@ -96,7 +106,7 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             return rover.AssignedCommandCenter != null ? rover.AssignedCommandCenter.AdjacentCoordinates.Contains(rover.CurrentPosition) : false;
         }
 
-        private void BuildCommandCenterIfNeeded(Rover rover)
+        private bool BuildCommandCenterIfNeeded(Rover rover)
         {
             if (CommandCenterBesidesTheRover(rover)
                 && CommandCenterHasNotBuiltYet(rover.AssignedCommandCenter) 
@@ -104,7 +114,10 @@ namespace Codecool.MarsExploration.MapExplorer.Exploration.Service.SimulationSte
             {
                 rover.BuildCommandCenter();
                 //log
+                return true;
             }
+
+            return false;
         }
 
         private bool HasAllResourcesToBuild(CommandCenter.Model.CommandCenter commandCenter)

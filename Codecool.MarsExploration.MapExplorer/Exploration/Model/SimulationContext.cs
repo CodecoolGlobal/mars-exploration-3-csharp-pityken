@@ -20,8 +20,9 @@ public record SimulationContext
     public int ResourcesNeededForCommandCenter { get; init; }
     public int ResourcesNeededForRover { get; init; }
     public int MaxRoverInventorySize { get; init; }
+    public int CommandCenterRadius { get; init; }
 
-    public SimulationContext(int maxSteps, Rover startingRover, Coordinate spaceShipLocation, Map map, IDictionary<string, string> resourcesToScan, string logFilePath, int commandCentersNeeded, int resourcesNeededForCommandCenter, int resourcesNeededForRover, int maxRoverInventorySize)
+    public SimulationContext(int maxSteps, Rover startingRover, Coordinate spaceShipLocation, Map map, IDictionary<string, string> resourcesToScan, string logFilePath, int commandCentersNeeded, int resourcesNeededForCommandCenter, int resourcesNeededForRover, int maxRoverInventorySize, int commandCenterRadius)
     {
         CurrentStepNumber = 0;
         MaxSteps = maxSteps;
@@ -37,6 +38,7 @@ public record SimulationContext
         ResourcesNeededForCommandCenter = resourcesNeededForCommandCenter;
         ResourcesNeededForRover = resourcesNeededForRover;
         MaxRoverInventorySize = maxRoverInventorySize;
+        CommandCenterRadius = commandCenterRadius;
     }
 
 }

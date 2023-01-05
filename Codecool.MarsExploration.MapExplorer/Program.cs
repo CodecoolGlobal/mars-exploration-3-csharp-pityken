@@ -31,6 +31,7 @@ class Program
         Coordinate landingSpot = new Coordinate(6, 6);
         Dictionary<string, string> resourcesToScan = new() { { "water", "*" }, { "mineral", "%" } };
         int maxSteps = 1000;
+        int commandCenterRadius = 5;
         int commandCentersNeeded = 3;
         int resourcesNeededForCommandCenter = 50;
         int resourcesNeededForRover = 15;
@@ -60,7 +61,7 @@ class Program
             IAssemblyRoutine assemblyRoutine = new AssemblyRoutine(roverDeployer);
             Rover MarsRover = roverDeployer.Deploy();
 
-            SimulationContext simulationContext = new SimulationContext(configuration.MaxSteps, MarsRover, configuration.LandingSpot, map, configuration.ResourcesToScan, logFilePath, commandCentersNeeded, resourcesNeededForCommandCenter, resourcesNeededForRover, maxRoverInventorySize);
+            SimulationContext simulationContext = new SimulationContext(configuration.MaxSteps, MarsRover, configuration.LandingSpot, map, configuration.ResourcesToScan, logFilePath, commandCentersNeeded, resourcesNeededForCommandCenter, resourcesNeededForRover, maxRoverInventorySize, commandCenterRadius);
 
             IEnumerable<ILogger> loggers = new List<ILogger>()
             {

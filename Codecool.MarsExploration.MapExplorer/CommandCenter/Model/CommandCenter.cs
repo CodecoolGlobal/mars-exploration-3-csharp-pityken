@@ -44,7 +44,7 @@ public class CommandCenter
         AssignResourceAndCommandCenterToTheRover(builderRover);
     }
 
-    private void AssignResourceAndCommandCenterToTheRover(Rover rover)
+    public void AssignResourceAndCommandCenterToTheRover(Rover rover)
     {
         rover.AssignCommandCenter(this);
         AssignResourceNodeToRover(rover);
@@ -63,7 +63,7 @@ public class CommandCenter
         }
     }
     
-    public void AssignResourceNodeToRover(Rover rover) //rover has built => run
+    private void AssignResourceNodeToRover(Rover rover) //rover has built => run
     {
         var mineralResource = ResourceNodes.Count(r => r.HasRoverAssinged == true) == 0 
             ? ResourceNodes.First(x => x.Type == "mineral") 
